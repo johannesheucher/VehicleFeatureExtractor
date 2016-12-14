@@ -2,8 +2,9 @@ package dataset;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Dataset {
 	private ArrayList<ImageData> imageList;
@@ -28,12 +29,13 @@ public class Dataset {
 		// load all images from image path
 		if (imagePath.isDirectory()) {
             for (final File f : imagePath.listFiles(IMAGE_FILTER)) {
-                try {
-					imageList.add(new ImageData(f));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+            	imageList.add(new ImageData(f));
             }
 		}
+	}
+	
+	
+	public List<ImageData> getImageList() {
+		return Collections.unmodifiableList(imageList);
 	}
 }
