@@ -9,7 +9,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 public class ImageData {
 	private Mat mat;
@@ -17,7 +19,12 @@ public class ImageData {
 	private boolean imageOutdated = true;
 	
 	public ImageData(File filename) {
-		setMat(Imgcodecs.imread(filename.toString()));
+		this(Imgcodecs.imread(filename.toString()));
+	}
+	
+	
+	public ImageData(Mat mat) {
+		setMat(mat);
 	}
 	
 	
@@ -40,13 +47,45 @@ public class ImageData {
 	}
 	
 	
-	private void rebuildImage() {
-		image = bufferedImageFromMat(mat);
-		imageOutdated = false;
+	public void needsRefreshImage() {
+		imageOutdated = true;
 	}
 	
 	
-	public static BufferedImage bufferedImageFromMat(Mat m) {
+	private void rebuildImage() {
+		image = bufferedImageFromMat(mat);
+		needsRefreshImage();
+	}
+	
+	
+	public void resize(Size size) {
+		Mat resizedMat = new Mat();
+		Imgproc.resize(mat, resizedMat, size);
+		setMat(resizedMat);
+	}
+	
+	
+	public void resize(int width) {
+		// resize and keep aspect ratio
+		float ratio = mat.width() / (float)mat.height();
+		int height = (int)(width / ratio);
+		resize(new Size(width, height));
+	}
+	
+	
+	@Override
+	public Object clone() {
+		return new ImageData(mat.clone());
+	}
+	
+	
+	public void display() {
+		Image image = getImage();
+		JOptionPane.showMessageDialog(null, new ImageIcon(image));
+	}
+	
+	
+	private static BufferedImage bufferedImageFromMat(Mat m) {
 		// source: http://answers.opencv.org/question/10344/opencv-java-load-image-to-gui/
 	    int type = BufferedImage.TYPE_BYTE_GRAY;
 	    if (m.channels() > 1) {
@@ -59,11 +98,5 @@ public class ImageData {
 	    final byte[] targetPixels = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
 	    System.arraycopy(b, 0, targetPixels, 0, b.length);
 	    return image;
-	}
-	
-	
-	public void display() {
-		Image image = getImage();
-		JOptionPane.showMessageDialog(null, new ImageIcon(image));
 	}
 }
