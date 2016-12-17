@@ -29,8 +29,14 @@ public class NumberPlateExtractor {
 	
 	
 	public static void topHat(Mat src, Mat dst, Size kernelSize) {
+		
+		
+		
 		// morphological operation - Top Hat (difference between image and opening of the image)
 		Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, kernelSize);
-		Imgproc.morphologyEx(src, dst, Imgproc.MORPH_TOPHAT, kernel);
+		//Imgproc.morphologyEx(src, dst, Imgproc.MORPH_TOPHAT, kernel);
+		//Imgproc.morphologyEx(src, dst, Imgproc.MORPH_BLACKHAT, kernel);
+		
+		Imgproc.morphologyEx(src, dst, Imgproc.MORPH_OPEN, kernel);
 	}
 }
