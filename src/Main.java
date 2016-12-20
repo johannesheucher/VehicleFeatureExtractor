@@ -1,5 +1,8 @@
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -12,6 +15,7 @@ import javax.swing.event.ChangeListener;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -29,7 +33,7 @@ public class Main {
 	public Main() {
 		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
 		
-		sourceImage = dataset.getImageList().get(0);
+		sourceImage = dataset.getImageList().get(1);
 		destImage = (ImageData)sourceImage.clone();
 		ImageIcon icon0 = new ImageIcon(sourceImage.getImage());
 		ImageIcon icon1 = new ImageIcon(sourceImage.getImage());
@@ -41,16 +45,17 @@ public class Main {
 		// add kernel sliders
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.PAGE_AXIS));
+		sliderPanel.setPreferredSize(new Dimension(200, 600));
 		frame.getContentPane().add(sliderPanel);
 		JSlider gaussKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 2);
 		JSlider gaussKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 2);
 		JSlider hatKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 1, 25, 3);
 		JSlider hatKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 25, 3);
 		
-		JSlider houghSliderRho = new JSlider(JSlider.HORIZONTAL, 0, 10, 1);
-		JSlider houghSliderThreshold = new JSlider(JSlider.HORIZONTAL, 5, 120, 50);
-		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 5, 120, 50);
-		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 5, 120, 10);
+		JSlider houghSliderRho = new JSlider(JSlider.HORIZONTAL, 1, 15, 1);
+		JSlider houghSliderThreshold = new JSlider(JSlider.HORIZONTAL, 1, 150, 50);
+		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 1, 250, 50);
+		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 1, 200, 10);
 		// double rho, int threshold, double minlength, double maxgap
 		
 		sliderPanel.add(new JLabel("gauss kernel size:"));
@@ -72,8 +77,6 @@ public class Main {
 		sliderPanel.add(houghSliderMaxGap);
 		JLabel houghLabel = new JLabel("no value");
 		sliderPanel.add(houghLabel);
-		
-		maybe find contour would do better here
 		
 		
 		ChangeListener sliderChangeListener = new ChangeListener() {
@@ -123,11 +126,19 @@ public class Main {
 				destImage.needsRefreshImage();
 				icon2.setImage(destImage.getImage());
 				
+				
+				// TODO
+//				* Try HoughLines (without P). Maybe the included step for finding the line's start and end is bad !!!
+//				* look at hough space and identify points of number plate lines. Should work!!
+//				* If the image is too big to identify the short lines of the number plate, make the image smaller:
+//					Split the image into overlapping rectangles (as wide as the expected number plate width) and search inside these.
+				
+				
 				// update
 				frame.getContentPane().update(frame.getContentPane().getGraphics());
 				gaussKernelLabel.setText(gaussW + " x " + gaussH);
 				hatKernelLabel.setText(hatW + " x " + hatH);
-				//houghLabel.setText("rho: " + houghRho + ", threshold: " + houghThreshold + "\nmin: " + houghMinLength + ", max: " + houghMaxGap);
+				houghLabel.setText("r: " + houghRho + ", t: " + houghThreshold + ", min: " + houghMinLength + ", max: " + houghMaxGap);
 			}
 		};
 		gaussKernelWidthSlider.addChangeListener(sliderChangeListener);
