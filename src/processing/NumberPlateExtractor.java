@@ -3,8 +3,10 @@ package processing;
 import java.util.List;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -36,11 +38,22 @@ public class NumberPlateExtractor {
 	}
 	
 	
-	public static boolean isNumberPlate(MatOfPoint2f contour) {
-		double perimeter = Imgproc.arcLength(contour, true);
-		MatOfPoint2f approx = new MatOfPoint2f();
-		Imgproc.approxPolyDP(contour, approx, 0.01 * perimeter, true);
+	public static boolean isNumberPlate(MatOfPoint contour) {
+		Rect rect = Imgproc.boundingRect(contour);
 		
-		return (approx.rows() == 4);
+		//  rough check: size and aspect ratio
+    	if (rect.width  > Const.NUMBER_PLATE_WIDTH[0]  && rect.width  < Const.NUMBER_PLATE_WIDTH[1] &&
+    		rect.height > Const.NUMBER_PLATE_HEIGHT[0] && rect.height < Const.NUMBER_PLATE_HEIGHT[1] &&
+    		Math.abs(rect.width / rect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_VARIANCE) {
+    		
+    		// more expensive check: shape by approximating contour with a polygon
+    		MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
+    		double perimeter = Imgproc.arcLength(contour2f, true);
+    		MatOfPoint2f approx = new MatOfPoint2f();
+    		Imgproc.approxPolyDP(contour2f, approx, 0.04 * perimeter, true);
+    		
+    		return (approx.rows() >= 2 && approx.rows() <= 6);
+    	}
+		return false;
 	}
 }

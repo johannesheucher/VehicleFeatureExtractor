@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import processing.Const;
+
 public class Dataset {
 	private ArrayList<ImageData> imageList;
-	
-	private static final int IMAGE_WIDTH = 800;
 	
 	private static final String[] EXTENSIONS = new String[] { "png", "jpg", "jpeg" };
 	private static final FilenameFilter IMAGE_FILTER = new FilenameFilter() {
@@ -36,7 +36,7 @@ public class Dataset {
             	// resize all images so that they have the same size (at least width, aspect ratio not important, only for RoI)
         		// This is important because the filter kernels have a distinct size and the car in each image should cover a more or less
         		// constant percentage of area of the image.
-            	image.resize(IMAGE_WIDTH);
+            	image.resize(Const.IMAGE_WIDTH);
             	
             	// extract RoI
             	// subtask - extract number plate rectangle

@@ -1,11 +1,16 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,19 +36,26 @@ public class Main {
 	
 	ImageData sourceImage;
 	ImageData destImage;
+	JFrame frame;
+	
+	ImageIcon icon0;
+	ImageIcon icon1;
+	ImageIcon icon2;
+	ImageIcon icon3;
+	int pictureIndex = 0;
 	
 	public Main() {
 		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
 		
-		sourceImage = dataset.getImageList().get(2);
+		sourceImage = dataset.getImageList().get(pictureIndex);
 		destImage = (ImageData)sourceImage.clone();
 		ImageData contourImage = new ImageData(new Mat());
-		ImageIcon icon0 = new ImageIcon(sourceImage.getImage());
-		ImageIcon icon1 = new ImageIcon(sourceImage.getImage());
-		ImageIcon icon2 = new ImageIcon(sourceImage.getImage());
-		ImageIcon icon3 = new ImageIcon(sourceImage.getImage());
+		icon0 = new ImageIcon(sourceImage.getImage());
+		icon1 = new ImageIcon(sourceImage.getImage());
+		icon2 = new ImageIcon(sourceImage.getImage());
+		icon3 = new ImageIcon(sourceImage.getImage());
 		
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
 		
 		// add kernel sliders
@@ -61,6 +73,9 @@ public class Main {
 		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 0, 250, 0);
 		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
 		// double rho, int threshold, double minlength, double maxgap
+		
+		JButton nextPictureButton = new JButton("next");
+		sliderPanel.add(nextPictureButton);
 		
 		sliderPanel.add(new JLabel("gauss kernel size:"));
 		sliderPanel.add(gaussKernelWidthSlider);
@@ -162,13 +177,8 @@ public class Main {
 					Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
 					contourImage.getMat().setTo(new Scalar(0));
 					for (int i = 0; i < contours.size(); i++) {
-						MatOfPoint contour = contours.get(i);
-				    	Rect rect = Imgproc.boundingRect(contour);
-				    	if (rect.width > hatKernelWidthSlider.getValue() && rect.height > hatKernelHeightSlider.getValue() && Math.abs(rect.width / rect.height - 4.5) < 0.55) {
-				    		MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
-				    		//if (NumberPlateExtractor.isNumberPlate(contour2f)) {
-				    			Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
-				    		//}
+						if (NumberPlateExtractor.isNumberPlate(contours.get(i))) {
+				    		Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
 				    	}
 					}
 					contourImage.needsRefreshImage();
@@ -198,6 +208,19 @@ public class Main {
 		houghSliderThreshold.addChangeListener(sliderChangeListener);
 		houghSliderMinLength.addChangeListener(sliderChangeListener);
 		houghSliderMaxGap.addChangeListener(sliderChangeListener);
+
+		ActionListener buttonListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pictureIndex++;
+				if (pictureIndex >= dataset.getImageList().size()) {
+					pictureIndex = 0;
+				}
+				sourceImage = dataset.getImageList().get(pictureIndex);
+				sliderChangeListener.stateChanged(null);
+			}
+		};
+		nextPictureButton.addActionListener(buttonListener);
 		
 		// add resulting image
 		//frame.getContentPane().add(new JLabel(icon0));
