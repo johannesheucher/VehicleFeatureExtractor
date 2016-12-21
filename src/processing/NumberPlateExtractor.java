@@ -46,6 +46,12 @@ public class NumberPlateExtractor {
     		rect.height > Const.NUMBER_PLATE_HEIGHT[0] && rect.height < Const.NUMBER_PLATE_HEIGHT[1] &&
     		Math.abs(rect.width / rect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_VARIANCE) {
     		
+    		// TODO: Better check could be to perform matchTemplate on the contour:
+    		// 1. Build template as bounding box of contour
+    		// 2. Match this template with the contour
+    		// remark: Which line width is best?
+    		// remark: Maybe, it is simpler to implement this on my own instead of using overheaded matchTemplate
+    		
     		// more expensive check: shape by approximating contour with a polygon
     		MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
     		double perimeter = Imgproc.arcLength(contour2f, true);
