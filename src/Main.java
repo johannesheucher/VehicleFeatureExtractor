@@ -2,6 +2,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -53,9 +54,9 @@ public class Main {
 		JSlider hatKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 25, 3);
 		
 		JSlider houghSliderRho = new JSlider(JSlider.HORIZONTAL, 1, 15, 1);
-		JSlider houghSliderThreshold = new JSlider(JSlider.HORIZONTAL, 1, 150, 50);
-		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 1, 250, 50);
-		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 1, 200, 10);
+		JSlider houghSliderThreshold = new JSlider(JSlider.HORIZONTAL, 1, 200, 50);
+		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 0, 250, 0);
+		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
 		// double rho, int threshold, double minlength, double maxgap
 		
 		sliderPanel.add(new JLabel("gauss kernel size:"));
@@ -86,7 +87,7 @@ public class Main {
 				int gaussH = gaussKernelHeightSlider.getValue() * 2 + 1;
 				int hatW = hatKernelWidthSlider.getValue();
 				int hatH = hatKernelHeightSlider.getValue();
-				destImage = (ImageData)sourceImage.clone();
+				//destImage = (ImageData)sourceImage.clone();
 				NumberPlateExtractor.toGray(sourceImage.getMat(), destImage.getMat());
 				Imgproc.GaussianBlur(destImage.getMat(), destImage.getMat(), new Size(gaussW, gaussH), 1, 1);
 				//NumberPlateExtractor.topHat(destImage.getMat(), destImage.getMat(), new Size(hatW, hatH));
@@ -104,27 +105,61 @@ public class Main {
 				icon1.setImage(destImage.getImage());
 				
 				// line detection
-				Mat linesMat = new Mat();
-				
 				int houghRho = houghSliderRho.getValue();
 				int houghThreshold = houghSliderThreshold.getValue();
 				int houghMinLength = houghSliderMinLength.getValue();
 				int houghMaxGap = houghSliderMaxGap.getValue();
-				Imgproc.HoughLinesP(destImage.getMat(), linesMat, houghRho, Math.PI/180, houghThreshold, houghMinLength, houghMaxGap);
-				Imgproc.cvtColor(destImage.getMat(), destImage.getMat(), Imgproc.COLOR_GRAY2BGR);
-				int numLines = linesMat.rows();
-				for (int x = 0; x < numLines; x++) {
-					double[] vec = linesMat.get(x, 0);
-					double x1 = vec[0], 
-			               y1 = vec[1],
-			               x2 = vec[2],
-			               y2 = vec[3];
-					Point start = new Point(x1, y1);
-					Point end = new Point(x2, y2);
-					Imgproc.line(destImage.getMat(), start, end, new Scalar(255,0,0), 3);
-			    }
-				destImage.needsRefreshImage();
-				icon2.setImage(destImage.getImage());
+				if (false) {
+					Mat linesMat = new Mat();
+					
+					Imgproc.HoughLinesP(destImage.getMat(), linesMat, houghRho, Math.PI/180, houghThreshold, houghMinLength, houghMaxGap);
+					Imgproc.cvtColor(destImage.getMat(), destImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+					int numLines = linesMat.rows();
+					
+					for (int x = 0; x < numLines; x++) {
+						// for HoughLines
+						double[] rhoTheta = linesMat.get(x, 0);
+						//float rho = linesMat[x][0], theta = linesMat[i][1];
+						double a = Math.cos(rhoTheta[1]);
+						double b = Math.sin(rhoTheta[1]);
+						double x0 = a*rhoTheta[0];
+						double y0 = b*rhoTheta[0];
+						Size size = destImage.getMat().size();
+						Point start = new Point(Math.round(x0 + size.width*(-b)), Math.round(y0 + size.height*(a)));
+						Point end = new Point(Math.round(x0 - size.width*(-b)), Math.round(y0 - size.height*(a)));
+						
+						
+						// for HoughLinesP
+	//					double[] vec = linesMat.get(x, 0);
+	//					double x1 = vec[0],
+	//			               y1 = vec[1],
+	//			               x2 = vec[2],
+	//			               y2 = vec[3];
+	//					Point start = new Point(x1, y1);
+	//					Point end = new Point(x2, y2);
+						Imgproc.line(destImage.getMat(), start, end, randomColor(), 2);
+				    }
+					destImage.needsRefreshImage();
+					icon2.setImage(destImage.getImage());
+				}
+				
+				// contour detection
+				if (true) {
+					List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+
+				    Imgproc.findContours(destImage.getMat(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+				    Imgproc.cvtColor(destImage.getMat(), destImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+				    for (int i = 0; i < contours.size(); i++) {
+				    	Imgproc.drawContours(destImage.getMat(), contours, i, randomColor(), 2);
+				    }
+				    
+//				    Iterator<MatOfPoint> each = contours.iterator();
+//				    while (each.hasNext()) {
+//				        MatOfPoint wrapper = each.next();
+//				    }
+				    destImage.needsRefreshImage();
+					icon2.setImage(destImage.getImage());
+				}
 				
 				
 				// TODO
@@ -157,8 +192,11 @@ public class Main {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		
+	}
+	
+	
+	public static Scalar randomColor() {
+		return new Scalar(Math.random() * 100 + 55, Math.random() * 100 + 55, Math.random() * 100 + 55);
 	}
 	
 	
