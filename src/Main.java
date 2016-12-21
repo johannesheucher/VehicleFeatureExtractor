@@ -2,7 +2,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -17,7 +16,9 @@ import javax.swing.event.ChangeListener;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -34,11 +35,13 @@ public class Main {
 	public Main() {
 		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
 		
-		sourceImage = dataset.getImageList().get(1);
+		sourceImage = dataset.getImageList().get(2);
 		destImage = (ImageData)sourceImage.clone();
+		ImageData contourImage = new ImageData(new Mat());
 		ImageIcon icon0 = new ImageIcon(sourceImage.getImage());
 		ImageIcon icon1 = new ImageIcon(sourceImage.getImage());
 		ImageIcon icon2 = new ImageIcon(sourceImage.getImage());
+		ImageIcon icon3 = new ImageIcon(sourceImage.getImage());
 		
 		JFrame frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
@@ -48,10 +51,10 @@ public class Main {
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.PAGE_AXIS));
 		sliderPanel.setPreferredSize(new Dimension(200, 600));
 		frame.getContentPane().add(sliderPanel);
-		JSlider gaussKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 2);
-		JSlider gaussKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 2);
-		JSlider hatKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 1, 25, 3);
-		JSlider hatKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 25, 3);
+		JSlider gaussKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 5);
+		JSlider gaussKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 5);
+		JSlider hatKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 1, 400, 200);
+		JSlider hatKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 1, 400, 40);
 		
 		JSlider houghSliderRho = new JSlider(JSlider.HORIZONTAL, 1, 15, 1);
 		JSlider houghSliderThreshold = new JSlider(JSlider.HORIZONTAL, 1, 200, 50);
@@ -65,7 +68,7 @@ public class Main {
 		JLabel gaussKernelLabel = new JLabel("no value");
 		sliderPanel.add(gaussKernelLabel);
 		
-		sliderPanel.add(new JLabel("hat kernel size:"));
+		sliderPanel.add(new JLabel("contour bb size:"));
 		sliderPanel.add(hatKernelWidthSlider);
 		sliderPanel.add(hatKernelHeightSlider);
 		JLabel hatKernelLabel = new JLabel("no value");
@@ -148,17 +151,28 @@ public class Main {
 					List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
 				    Imgproc.findContours(destImage.getMat(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-				    Imgproc.cvtColor(destImage.getMat(), destImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+				    Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
 				    for (int i = 0; i < contours.size(); i++) {
-				    	Imgproc.drawContours(destImage.getMat(), contours, i, randomColor(), 2);
+				    	Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
 				    }
-				    
-//				    Iterator<MatOfPoint> each = contours.iterator();
-//				    while (each.hasNext()) {
-//				        MatOfPoint wrapper = each.next();
-//				    }
-				    destImage.needsRefreshImage();
-					icon2.setImage(destImage.getImage());
+				    contourImage.needsRefreshImage();
+					icon2.setImage(contourImage.getImage());
+					
+					// filter for potential number plate contours
+					Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+					contourImage.getMat().setTo(new Scalar(0));
+					for (int i = 0; i < contours.size(); i++) {
+						MatOfPoint contour = contours.get(i);
+				    	Rect rect = Imgproc.boundingRect(contour);
+				    	if (rect.width > hatKernelWidthSlider.getValue() && rect.height > hatKernelHeightSlider.getValue() && Math.abs(rect.width / rect.height - 4.5) < 0.55) {
+				    		MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
+				    		//if (NumberPlateExtractor.isNumberPlate(contour2f)) {
+				    			Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
+				    		//}
+				    	}
+					}
+					contourImage.needsRefreshImage();
+					icon3.setImage(contourImage.getImage());
 				}
 				
 				
@@ -186,9 +200,10 @@ public class Main {
 		houghSliderMaxGap.addChangeListener(sliderChangeListener);
 		
 		// add resulting image
-		frame.getContentPane().add(new JLabel(icon0));
+		//frame.getContentPane().add(new JLabel(icon0));
 		frame.getContentPane().add(new JLabel(icon1));
 		frame.getContentPane().add(new JLabel(icon2));
+		frame.getContentPane().add(new JLabel(icon3));
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

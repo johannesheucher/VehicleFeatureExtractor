@@ -3,6 +3,7 @@ package processing;
 import java.util.List;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -29,14 +30,17 @@ public class NumberPlateExtractor {
 	
 	
 	public static void topHat(Mat src, Mat dst, Size kernelSize) {
-		
-		
-		
 		// morphological operation - Top Hat (difference between image and opening of the image)
 		Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, kernelSize);
-		//Imgproc.morphologyEx(src, dst, Imgproc.MORPH_TOPHAT, kernel);
-		//Imgproc.morphologyEx(src, dst, Imgproc.MORPH_BLACKHAT, kernel);
+		Imgproc.morphologyEx(src, dst, Imgproc.MORPH_TOPHAT, kernel);
+	}
+	
+	
+	public static boolean isNumberPlate(MatOfPoint2f contour) {
+		double perimeter = Imgproc.arcLength(contour, true);
+		MatOfPoint2f approx = new MatOfPoint2f();
+		Imgproc.approxPolyDP(contour, approx, 0.01 * perimeter, true);
 		
-		Imgproc.morphologyEx(src, dst, Imgproc.MORPH_OPEN, kernel);
+		return (approx.rows() == 4);
 	}
 }
