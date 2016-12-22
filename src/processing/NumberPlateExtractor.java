@@ -1,26 +1,47 @@
 package processing;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import dataset.ImageData;
-
 public class NumberPlateExtractor {
 	
-	public static List<Point> extract(ImageData image, Size kernelSize) {
+	private static final int GAUSS_KERNEL_SIZE = 7;
+	
+	/**
+	 * Extracts bounding region around found number plate or <strong>null</strong>
+	 * @param image Must contain a gray mat
+	 * @return Bounding region or <strong>null</strong>
+	 */
+	public static Rect extract(Mat src) {
 		Mat mat = new Mat();
 		
-		// convert to gray scale
-		toGray(image.getMat(), mat);
+		// blur
+		Imgproc.GaussianBlur(src, mat, new Size(GAUSS_KERNEL_SIZE, GAUSS_KERNEL_SIZE), 1, 1);
 		
-		topHat(mat, mat, kernelSize);
+		// binarize
+		Imgproc.threshold(mat, mat, 130, 255, Imgproc.THRESH_BINARY);
+		
+		// detect edges
+		Imgproc.Canny(mat, mat, 50, 200, 3, true);
+		
+		// detect contours
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	    Imgproc.findContours(mat, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		
+		// filter for potential number plate contours
+		for (int i = 0; i < contours.size(); i++) {
+			Rect rect = Imgproc.boundingRect(contours.get(i));
+			if (NumberPlateExtractor.isNumberPlate(contours.get(i), rect)) {
+				return rect;
+	    	}
+		}
 		
 		return null;
 	}
@@ -38,13 +59,11 @@ public class NumberPlateExtractor {
 	}
 	
 	
-	public static boolean isNumberPlate(MatOfPoint contour) {
-		Rect rect = Imgproc.boundingRect(contour);
-		
+	private static boolean isNumberPlate(MatOfPoint contour, Rect boundingRect) {
 		//  rough check: size and aspect ratio
-    	if (rect.width  > Const.NUMBER_PLATE_WIDTH[0]  && rect.width  < Const.NUMBER_PLATE_WIDTH[1] &&
-    		rect.height > Const.NUMBER_PLATE_HEIGHT[0] && rect.height < Const.NUMBER_PLATE_HEIGHT[1] &&
-    		Math.abs(rect.width / rect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_VARIANCE) {
+    	if (boundingRect.width  > Const.NUMBER_PLATE_WIDTH[0]  && boundingRect.width  < Const.NUMBER_PLATE_WIDTH[1] &&
+    		boundingRect.height > Const.NUMBER_PLATE_HEIGHT[0] && boundingRect.height < Const.NUMBER_PLATE_HEIGHT[1] &&
+    		Math.abs(boundingRect.width / boundingRect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_VARIANCE) {
     		
     		// TODO: Better check could be to perform matchTemplate on the contour:
     		// 1. Build template as bounding box of contour

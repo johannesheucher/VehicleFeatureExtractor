@@ -105,99 +105,26 @@ public class Main {
 				int gaussH = gaussKernelHeightSlider.getValue() * 2 + 1;
 				int hatW = hatKernelWidthSlider.getValue();
 				int hatH = hatKernelHeightSlider.getValue();
-				//destImage = (ImageData)sourceImage.clone();
 				NumberPlateExtractor.toGray(sourceImage.getMat(), destImage.getMat());
-				Imgproc.GaussianBlur(destImage.getMat(), destImage.getMat(), new Size(gaussW, gaussH), 1, 1);
-				//NumberPlateExtractor.topHat(destImage.getMat(), destImage.getMat(), new Size(hatW, hatH));
-//				destImage.needsRefreshImage();
-//				icon0.setImage(destImage.getImage());
 				
-				// binarize
-				Imgproc.threshold(destImage.getMat(), destImage.getMat(), 130, 255, Imgproc.THRESH_BINARY);
-				destImage.needsRefreshImage();
-				icon0.setImage(destImage.getImage());
+				sourceImage.needsRefreshImage();
+				icon0.setImage(sourceImage.getImage());
 				
-				// edge detection
-				Imgproc.Canny(destImage.getMat(), destImage.getMat(), 50, 200, 3, true);
-				destImage.needsRefreshImage();
-				icon1.setImage(destImage.getImage());
-				
-				// line detection
-				int houghRho = houghSliderRho.getValue();
-				int houghThreshold = houghSliderThreshold.getValue();
-				int houghMinLength = houghSliderMinLength.getValue();
-				int houghMaxGap = houghSliderMaxGap.getValue();
-				if (false) {
-					Mat linesMat = new Mat();
-					
-					Imgproc.HoughLinesP(destImage.getMat(), linesMat, houghRho, Math.PI/180, houghThreshold, houghMinLength, houghMaxGap);
-					Imgproc.cvtColor(destImage.getMat(), destImage.getMat(), Imgproc.COLOR_GRAY2BGR);
-					int numLines = linesMat.rows();
-					
-					for (int x = 0; x < numLines; x++) {
-						// for HoughLines
-						double[] rhoTheta = linesMat.get(x, 0);
-						//float rho = linesMat[x][0], theta = linesMat[i][1];
-						double a = Math.cos(rhoTheta[1]);
-						double b = Math.sin(rhoTheta[1]);
-						double x0 = a*rhoTheta[0];
-						double y0 = b*rhoTheta[0];
-						Size size = destImage.getMat().size();
-						Point start = new Point(Math.round(x0 + size.width*(-b)), Math.round(y0 + size.height*(a)));
-						Point end = new Point(Math.round(x0 - size.width*(-b)), Math.round(y0 - size.height*(a)));
-						
-						
-						// for HoughLinesP
-	//					double[] vec = linesMat.get(x, 0);
-	//					double x1 = vec[0],
-	//			               y1 = vec[1],
-	//			               x2 = vec[2],
-	//			               y2 = vec[3];
-	//					Point start = new Point(x1, y1);
-	//					Point end = new Point(x2, y2);
-						Imgproc.line(destImage.getMat(), start, end, randomColor(), 2);
-				    }
-					destImage.needsRefreshImage();
-					icon2.setImage(destImage.getImage());
+				// detect number plate
+				Rect rect = NumberPlateExtractor.extract(destImage.getMat());
+				Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+				if (rect != null) {
+					Scalar color = new Scalar(255, 60, 255);
+					Imgproc.rectangle(contourImage.getMat(), new Point(rect.x,  rect.y), new Point(rect.x + rect.width, rect.y + rect.height), color, 2);
 				}
-				
-				// contour detection
-				if (true) {
-					List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-
-				    Imgproc.findContours(destImage.getMat(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-				    Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
-				    for (int i = 0; i < contours.size(); i++) {
-				    	Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
-				    }
-				    contourImage.needsRefreshImage();
-					icon2.setImage(contourImage.getImage());
-					
-					// filter for potential number plate contours
-					Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
-					contourImage.getMat().setTo(new Scalar(0));
-					for (int i = 0; i < contours.size(); i++) {
-						if (NumberPlateExtractor.isNumberPlate(contours.get(i))) {
-				    		Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
-				    	}
-					}
-					contourImage.needsRefreshImage();
-					icon3.setImage(contourImage.getImage());
-				}
-				
-				
-				// TODO
-//				* Try HoughLines (without P). Maybe the included step for finding the line's start and end is bad !!!
-//				* look at hough space and identify points of number plate lines. Should work!!
-//				* If the image is too big to identify the short lines of the number plate, make the image smaller:
-//					Split the image into overlapping rectangles (as wide as the expected number plate width) and search inside these.
-				
+				contourImage.needsRefreshImage();
+				icon1.setImage(contourImage.getImage());
 				
 				// update
 				frame.getContentPane().update(frame.getContentPane().getGraphics());
 				gaussKernelLabel.setText(gaussW + " x " + gaussH);
 				hatKernelLabel.setText(hatW + " x " + hatH);
-				houghLabel.setText("r: " + houghRho + ", t: " + houghThreshold + ", min: " + houghMinLength + ", max: " + houghMaxGap);
+//				houghLabel.setText("r: " + houghRho + ", t: " + houghThreshold + ", min: " + houghMinLength + ", max: " + houghMaxGap);
 			}
 		};
 		gaussKernelWidthSlider.addChangeListener(sliderChangeListener);
@@ -223,10 +150,8 @@ public class Main {
 		nextPictureButton.addActionListener(buttonListener);
 		
 		// add resulting image
-		//frame.getContentPane().add(new JLabel(icon0));
+		frame.getContentPane().add(new JLabel(icon0));
 		frame.getContentPane().add(new JLabel(icon1));
-		frame.getContentPane().add(new JLabel(icon2));
-		frame.getContentPane().add(new JLabel(icon3));
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
