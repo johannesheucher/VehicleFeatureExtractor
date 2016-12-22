@@ -105,10 +105,11 @@ public class Main {
 				int gaussH = gaussKernelHeightSlider.getValue() * 2 + 1;
 				int hatW = hatKernelWidthSlider.getValue();
 				int hatH = hatKernelHeightSlider.getValue();
-				NumberPlateExtractor.toGray(sourceImage.getMat(), destImage.getMat());
 				
 				sourceImage.needsRefreshImage();
 				icon0.setImage(sourceImage.getImage());
+				
+				NumberPlateExtractor.toGray(sourceImage.getMat(), destImage.getMat());
 				
 				// detect number plate
 				Rect rect = NumberPlateExtractor.extract(destImage.getMat());
@@ -124,7 +125,6 @@ public class Main {
 				frame.getContentPane().update(frame.getContentPane().getGraphics());
 				gaussKernelLabel.setText(gaussW + " x " + gaussH);
 				hatKernelLabel.setText(hatW + " x " + hatH);
-//				houghLabel.setText("r: " + houghRho + ", t: " + houghThreshold + ", min: " + houghMinLength + ", max: " + houghMaxGap);
 			}
 		};
 		gaussKernelWidthSlider.addChangeListener(sliderChangeListener);
@@ -152,9 +152,11 @@ public class Main {
 		// add resulting image
 		frame.getContentPane().add(new JLabel(icon0));
 		frame.getContentPane().add(new JLabel(icon1));
+		//frame.getContentPane().add(new JLabel(icon2));
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		sliderChangeListener.stateChanged(null);
 	}
 	
 	
