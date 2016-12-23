@@ -16,7 +16,7 @@ public class NumberPlateExtractor {
 	
 	/**
 	 * Extracts bounding region around found number plate or <strong>null</strong>
-	 * @param image Must contain a gray mat
+	 * @param src Must contain a gray mat
 	 * @return Bounding region or <strong>null</strong>
 	 */
 	public static Rect extract(Mat src) {
@@ -61,9 +61,9 @@ public class NumberPlateExtractor {
 	
 	private static boolean isNumberPlate(MatOfPoint contour, Rect boundingRect) {
 		//  rough check: size and aspect ratio
-    	if (boundingRect.width  > Const.NUMBER_PLATE_WIDTH[0]  && boundingRect.width  < Const.NUMBER_PLATE_WIDTH[1] &&
-    		boundingRect.height > Const.NUMBER_PLATE_HEIGHT[0] && boundingRect.height < Const.NUMBER_PLATE_HEIGHT[1] &&
-    		Math.abs(boundingRect.width / boundingRect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_VARIANCE) {
+    	if (boundingRect.width  > Const.NUMBER_PLATE_MIN_WIDTH  && boundingRect.width  < Const.NUMBER_PLATE_MAX_WIDTH &&
+    		boundingRect.height > Const.NUMBER_PLATE_MIN_HEIGHT && boundingRect.height < Const.NUMBER_PLATE_MAX_HEIGHT &&
+    		Math.abs(boundingRect.width / boundingRect.height - Const.NUMBER_PLATE_ASPECT_RATIO) < Const.NUMBER_PLATE_ASPECT_RATIO_EPSILON) {
     		
     		// TODO: Better check could be to perform matchTemplate on the contour:
     		// 1. Build template as bounding box of contour
