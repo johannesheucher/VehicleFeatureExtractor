@@ -2,8 +2,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +19,10 @@ import javax.swing.event.ChangeListener;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import dataset.Dataset;
@@ -35,25 +32,23 @@ import processing.NumberPlateExtractor;
 public class Main {
 	
 	ImageData sourceImage;
-	ImageData destImage;
+	ImageData grayImage;
 	JFrame frame;
 	
-	ImageIcon icon0;
-	ImageIcon icon1;
-	ImageIcon icon2;
-	ImageIcon icon3;
 	int pictureIndex = 0;
 	
 	public Main() {
 		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
-		destImage = (ImageData)sourceImage.clone();
+		grayImage = (ImageData)sourceImage.clone();
 		ImageData contourImage = new ImageData(new Mat());
-		icon0 = new ImageIcon(sourceImage.getImage());
-		icon1 = new ImageIcon(sourceImage.getImage());
-		icon2 = new ImageIcon(sourceImage.getImage());
-		icon3 = new ImageIcon(sourceImage.getImage());
+		ImageData finalImage = new ImageData(new Mat());
+		ImageIcon icon0 = new ImageIcon(sourceImage.getImage());
+		ImageIcon icon1 = new ImageIcon(sourceImage.getImage());
+		ImageIcon icon2 = new ImageIcon(sourceImage.getImage());
+		ImageIcon icon3 = new ImageIcon(sourceImage.getImage());
+		ImageIcon icon4 = new ImageIcon(sourceImage.getImage());
 		
 		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
@@ -61,7 +56,7 @@ public class Main {
 		// add kernel sliders
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.PAGE_AXIS));
-		sliderPanel.setPreferredSize(new Dimension(200, 600));
+		sliderPanel.setPreferredSize(new Dimension(150, 600));
 		frame.getContentPane().add(sliderPanel);
 		JSlider gaussKernelWidthSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 5);
 		JSlider gaussKernelHeightSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 5);
@@ -109,17 +104,36 @@ public class Main {
 				sourceImage.needsRefreshImage();
 				icon0.setImage(sourceImage.getImage());
 				
-				NumberPlateExtractor.toGray(sourceImage.getMat(), destImage.getMat());
+				NumberPlateExtractor.toGray(sourceImage.getMat(), grayImage.getMat());
 				
 				// detect number plate
-				Rect rect = NumberPlateExtractor.extract(destImage.getMat());
-				Imgproc.cvtColor(destImage.getMat(), contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+				Mat binary = new Mat();
+				Mat edges = new Mat();
+				Range rowRange = new Range();
+				Range colRange = new Range();
+				NumberPlateExtractor.calculateCropOffset(grayImage.getMat(), rowRange, colRange);
+				Mat sub = grayImage.getMat().submat(rowRange, colRange);
+				Rect rect = NumberPlateExtractor.extract(sub, binary, edges, contours);
+				Imgproc.cvtColor(grayImage.getMat(), finalImage.getMat(), Imgproc.COLOR_GRAY2BGR);
 				if (rect != null) {
 					Scalar color = new Scalar(255, 60, 255);
-					Imgproc.rectangle(contourImage.getMat(), new Point(rect.x,  rect.y), new Point(rect.x + rect.width, rect.y + rect.height), color, 2);
+					rect.x += colRange.start;
+					rect.y += rowRange.start;
+					Imgproc.rectangle(finalImage.getMat(), new Point(rect.x,  rect.y), new Point(rect.x + rect.width, rect.y + rect.height), color, 2);
+				}
+				finalImage.needsRefreshImage();
+				icon4.setImage(finalImage.getImage());
+				
+				// additionally, output intermediate steps
+				icon1.setImage(new ImageData(binary).getImage());
+				icon2.setImage(new ImageData(edges).getImage());
+				Imgproc.cvtColor(edges, contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
+				for (int i = 0; i < contours.size(); i++) {
+	    			Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
 				}
 				contourImage.needsRefreshImage();
-				icon1.setImage(contourImage.getImage());
+				icon3.setImage(contourImage.getImage());
 				
 				// update
 				frame.getContentPane().update(frame.getContentPane().getGraphics());
@@ -150,9 +164,11 @@ public class Main {
 		nextPictureButton.addActionListener(buttonListener);
 		
 		// add resulting image
-		frame.getContentPane().add(new JLabel(icon0));
+		//frame.getContentPane().add(new JLabel(icon0));
 		frame.getContentPane().add(new JLabel(icon1));
-		//frame.getContentPane().add(new JLabel(icon2));
+		frame.getContentPane().add(new JLabel(icon2));
+		frame.getContentPane().add(new JLabel(icon3));
+		frame.getContentPane().add(new JLabel(icon4));
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
