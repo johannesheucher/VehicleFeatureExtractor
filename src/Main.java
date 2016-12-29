@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,6 +29,7 @@ import org.opencv.imgproc.Imgproc;
 import dataset.Dataset;
 import dataset.ImageData;
 import processing.NumberPlateExtractor;
+import processing.RoIExtractor;
 
 public class Main {
 	
@@ -50,6 +52,12 @@ public class Main {
 		ImageIcon icon3 = new ImageIcon(sourceImage.getImage());
 		ImageIcon icon4 = new ImageIcon(sourceImage.getImage());
 		
+		JLabel icon0Label = new JLabel(icon0);
+		JLabel icon1Label = new JLabel(icon1);
+		JLabel icon2Label = new JLabel(icon2);
+		JLabel icon3Label = new JLabel(icon3);
+		JLabel icon4Label = new JLabel(icon4);
+		
 		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
 		
@@ -68,6 +76,18 @@ public class Main {
 		JSlider houghSliderMinLength = new JSlider(JSlider.HORIZONTAL, 0, 250, 0);
 		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
 		// double rho, int threshold, double minlength, double maxgap
+		
+		JCheckBox showBinary = new JCheckBox("Binary", true);
+		JCheckBox showEdges = new JCheckBox("Edges", true);
+		JCheckBox showContours = new JCheckBox("Contours", true);
+		JCheckBox showRect = new JCheckBox("Rect", true);
+		JCheckBox showRoI = new JCheckBox("RoI", true);
+		
+		sliderPanel.add(showBinary);
+		sliderPanel.add(showEdges);
+		sliderPanel.add(showContours);
+		sliderPanel.add(showRect);
+		sliderPanel.add(showRoI);
 		
 		JButton nextPictureButton = new JButton("next");
 		sliderPanel.add(nextPictureButton);
@@ -101,8 +121,8 @@ public class Main {
 				int hatW = hatKernelWidthSlider.getValue();
 				int hatH = hatKernelHeightSlider.getValue();
 				
-				sourceImage.needsRefreshImage();
-				icon0.setImage(sourceImage.getImage());
+				//sourceImage.needsRefreshImage();
+				//icon0.setImage(sourceImage.getImage());
 				
 				NumberPlateExtractor.toGray(sourceImage.getMat(), grayImage.getMat());
 				
@@ -110,6 +130,7 @@ public class Main {
 				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 				Mat binary = new Mat();
 				Mat edges = new Mat();
+				Mat matRoI = null;
 				Range rowRange = new Range();
 				Range colRange = new Range();
 				NumberPlateExtractor.calculateCropOffset(grayImage.getMat(), rowRange, colRange);
@@ -121,19 +142,49 @@ public class Main {
 					rect.x += colRange.start;
 					rect.y += rowRange.start;
 					Imgproc.rectangle(finalImage.getMat(), new Point(rect.x,  rect.y), new Point(rect.x + rect.width, rect.y + rect.height), color, 2);
+					matRoI = RoIExtractor.extract(grayImage.getMat(), rect);
 				}
 				finalImage.needsRefreshImage();
-				icon4.setImage(finalImage.getImage());
+				if (showRect.isSelected()) {
+					icon3Label.setVisible(true);
+					icon3.setImage(finalImage.getImage());
+				} else {
+					icon3Label.setVisible(false);
+				}
 				
 				// additionally, output intermediate steps
-				icon1.setImage(new ImageData(binary).getImage());
-				icon2.setImage(new ImageData(edges).getImage());
+				if (showBinary.isSelected()) {
+					icon0Label.setVisible(true);
+					icon0.setImage(new ImageData(binary).getImage());
+				} else {
+					icon0Label.setVisible(false);
+				}
+				if (showEdges.isSelected()) {
+					icon1Label.setVisible(true);
+					icon1.setImage(new ImageData(edges).getImage());
+				} else {
+					icon1Label.setVisible(false);
+				}
+				
 				Imgproc.cvtColor(edges, contourImage.getMat(), Imgproc.COLOR_GRAY2BGR);
 				for (int i = 0; i < contours.size(); i++) {
 	    			Imgproc.drawContours(contourImage.getMat(), contours, i, randomColor(), 2);
 				}
 				contourImage.needsRefreshImage();
-				icon3.setImage(contourImage.getImage());
+				if (showContours.isSelected()) {
+					icon2Label.setVisible(true);
+					icon2.setImage(contourImage.getImage());
+				} else {
+					icon2Label.setVisible(false);
+				}
+				
+				// show RoI
+				if (showRoI.isSelected() && matRoI != null) {
+					icon4Label.setVisible(true);
+					icon4.setImage(new ImageData(matRoI).getImage());
+				} else {
+					icon4Label.setVisible(false);
+				}
 				
 				// update
 				frame.getContentPane().update(frame.getContentPane().getGraphics());
@@ -163,12 +214,24 @@ public class Main {
 		};
 		nextPictureButton.addActionListener(buttonListener);
 		
+		ChangeListener checkBoxListener = new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				sliderChangeListener.stateChanged(null);
+			}
+		};
+		showBinary.addChangeListener(checkBoxListener);
+		showEdges.addChangeListener(checkBoxListener);
+		showContours.addChangeListener(checkBoxListener);
+		showRect.addChangeListener(checkBoxListener);
+		showRoI.addChangeListener(checkBoxListener);
+		
 		// add resulting image
-		//frame.getContentPane().add(new JLabel(icon0));
-		frame.getContentPane().add(new JLabel(icon1));
-		frame.getContentPane().add(new JLabel(icon2));
-		frame.getContentPane().add(new JLabel(icon3));
-		frame.getContentPane().add(new JLabel(icon4));
+		frame.getContentPane().add(icon0Label);
+		frame.getContentPane().add(icon1Label);
+		frame.getContentPane().add(icon2Label);
+		frame.getContentPane().add(icon3Label);
+		frame.getContentPane().add(icon4Label);
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

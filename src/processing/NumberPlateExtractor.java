@@ -13,7 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class NumberPlateExtractor {
 	
-	private static final int GAUSS_KERNEL_SIZE = 7;
+	private static final int GAUSS_KERNEL_SIZE = 13;
 	
 	
 	public static void calculateCropOffset(Mat src, Range rowRange, Range colRange) {
@@ -24,14 +24,14 @@ public class NumberPlateExtractor {
 			colRange.end = src.cols() - gapX / 2;
 			
 			// only use lower part of the source image
-			rowRange.start = (int)(src.rows() * 0.4);
+			rowRange.start = (int)(src.rows() * 0.3);
 			rowRange.end   = (int)(src.rows() * 0.8);
 		} else {
 			int gapX = Math.max(src.rows() - Const.NUMBER_PLATE_MAX_WIDTH * 2, 0);
 			rowRange.start = gapX / 2;
 			rowRange.end = src.rows() - gapX / 2;
 			
-			colRange.start = (int)(src.cols() * 0.4);
+			colRange.start = (int)(src.cols() * 0.3);
 			colRange.end   = (int)(src.cols() * 0.8);
 		}
 	}
@@ -55,9 +55,12 @@ public class NumberPlateExtractor {
 	 * @param contours Output containing all found contours
 	 * @return Bounding region or <strong>null</strong>
 	 */
-	public static Rect extract(Mat src, Mat binary, Mat edges, List<MatOfPoint> contours) {
+	public static Rect extract(Mat src, Mat binary, Mat edges, List<MatOfPoint> contours/*, List<MatOfPoint> convexHulls*/) {
 		// blur
 		Imgproc.GaussianBlur(src, binary, new Size(GAUSS_KERNEL_SIZE, GAUSS_KERNEL_SIZE), 1, 1);
+		
+		// histogram equalization
+		//Imgproc.equalizeHist(binary, binary);
 		
 		// binarize
 		Imgproc.threshold(binary, binary, 130, 255, Imgproc.THRESH_BINARY);		// 11 matches
@@ -69,6 +72,24 @@ public class NumberPlateExtractor {
 		
 		// detect contours
 	    Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+	    
+//	    // detect convex hulls
+//	    List<MatOfPoint> convexHulls = new ArrayList<>();
+//        List<Point> l = new ArrayList<Point>();
+//	    for (MatOfPoint contour : contours) {
+//	    	MatOfInt convexHullIndices = new MatOfInt();
+//		    Imgproc.convexHull(contour, convexHullIndices);
+//	        int[] intlist = convexHullIndices.toArray();
+//	        l.clear();
+//	        for (int i = 0; i < intlist.length; i++) {
+//	            l.add(contour.toList().get(convexHullIndices.toList().get(i)));
+//	        }
+//	        MatOfPoint convexHullMat = new MatOfPoint();
+//	        convexHullMat.fromList(l);
+//	        convexHulls.add(convexHullMat);
+//	    }
+//	    contours.clear();
+//	    contours.addAll(convexHulls);
 	    
 		// filter for potential number plate contours
 	    Rect minRect = null;
