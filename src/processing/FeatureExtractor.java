@@ -14,14 +14,13 @@ public class FeatureExtractor {
 	 * @param src Input
 	 * @param descriptors Output
 	 */
-	public static void extract(Mat src, Mat descriptors) {
+	public static void extract(Mat src, MatOfKeyPoint keyPoints, Mat descriptors) {
 		if (detector == null || descriptorExtractor == null) {
-			detector = FeatureDetector.create(FeatureDetector.SURF);
-			descriptorExtractor = DescriptorExtractor.create(DescriptorExtractor.SURF);
+			detector = FeatureDetector.create(FeatureDetector.ORB);
+			descriptorExtractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
 		}
 		
 		// extract descriptors
-		MatOfKeyPoint keyPoints = new MatOfKeyPoint();
 		detector.detect(src, keyPoints);
 		descriptorExtractor.compute(src, keyPoints, descriptors);
 	}
