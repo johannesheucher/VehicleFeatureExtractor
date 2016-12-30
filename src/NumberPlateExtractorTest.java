@@ -31,7 +31,7 @@ import dataset.ImageData;
 import processing.NumberPlateExtractor;
 import processing.RoIExtractor;
 
-public class Main {
+public class NumberPlateExtractorTest {
 	
 	ImageData sourceImage;
 	ImageData grayImage;
@@ -39,7 +39,7 @@ public class Main {
 	
 	int pictureIndex = 0;
 	
-	public Main() {
+	public NumberPlateExtractorTest() {
 		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
@@ -246,6 +246,6 @@ public class Main {
 	
 	public static void main(String[] args) {
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-		new Main();
+		new NumberPlateExtractorTest();
 	}
 }
