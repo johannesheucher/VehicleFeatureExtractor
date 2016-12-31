@@ -12,9 +12,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
+import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
@@ -38,6 +42,7 @@ public class FeatureExtractorTest {
 		
 		JFrame frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
+		frame.getContentPane().setPreferredSize(new Dimension(1800, 800));
 		
 		// side panel
 		JPanel sliderPanel = new JPanel();
@@ -48,7 +53,7 @@ public class FeatureExtractorTest {
 		ActionListener buttonListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// extract features of each
+				// extract features of each image
 				MatOfKeyPoint dataKeyPoints = new MatOfKeyPoint();
 				MatOfKeyPoint testKeyPoints = new MatOfKeyPoint();
 				Mat dataDescriptors = new Mat();
@@ -62,10 +67,24 @@ public class FeatureExtractorTest {
 				Features2d.drawKeypoints(rgb, dataKeyPoints, rgb, new Scalar(255, 0, 0), 0);
 				dataIcon.setImage(new ImageData(rgb).getImage());
 				
+				Imgproc.cvtColor(testImage.getMat(), rgb, Imgproc.COLOR_BGR2RGB);
+				Features2d.drawKeypoints(rgb, testKeyPoints, rgb, new Scalar(0, 0, 255), 0);
+				testIcon.setImage(new ImageData(rgb).getImage());
+				
 				// match features
+				DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+				MatOfDMatch matches = new MatOfDMatch();
+			    matcher.match(dataDescriptors, testDescriptors, matches);
 				
 				// draw matches
-				
+			    Imgproc.cvtColor(dataImage.getMat(), dataImage.getMat(), Imgproc.COLOR_BGR2BGRA);
+			    Imgproc.cvtColor(testImage.getMat(), testImage.getMat(), Imgproc.COLOR_BGR2BGRA);
+			    Scalar matchColor = new Scalar(60, 0, 255, 0);
+			    Scalar pointColor = new Scalar(200, 255, 255, 0);
+			    Mat matMatches = new Mat(dataImage.getMat().rows(), dataImage.getMat().cols() + testImage.getMat().cols(), CvType.CV_8UC4);
+			    Features2d.drawMatches(dataImage.getMat(), dataKeyPoints, testImage.getMat(), testKeyPoints, matches, matMatches, matchColor, pointColor, new MatOfByte(), Features2d.DRAW_OVER_OUTIMG);
+			    matchIcon.setImage(new ImageData(matMatches).getImage());
+			    
 				// compare SURF with ORB
 				
 				// update
