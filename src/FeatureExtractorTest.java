@@ -22,6 +22,7 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
+import dataset.Dictionary;
 import dataset.ImageData;
 import processing.FeatureExtractor;
 
@@ -29,8 +30,8 @@ public class FeatureExtractorTest {
 	
 	public FeatureExtractorTest() {
 		// load two similar images (maybe already a vehicle RoI)
-		ImageData dataImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_data.png"));
-		ImageData testImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_test.png"));
+		ImageData dataImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_data_corsa.png"));
+		ImageData testImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_test_corsa.png"));
 		
 		ImageIcon dataIcon = new ImageIcon(dataImage.getImage());
 		ImageIcon testIcon = new ImageIcon(testImage.getImage());
@@ -81,9 +82,12 @@ public class FeatureExtractorTest {
 			    Imgproc.cvtColor(testImage.getMat(), testImage.getMat(), Imgproc.COLOR_BGR2BGRA);
 			    Scalar matchColor = new Scalar(60, 0, 255, 0);
 			    Scalar pointColor = new Scalar(200, 255, 255, 0);
-			    Mat matMatches = new Mat(dataImage.getMat().rows(), dataImage.getMat().cols() + testImage.getMat().cols(), CvType.CV_8UC4);
+			    Mat matMatches = new Mat(Math.max(dataImage.getMat().rows(), testImage.getMat().rows()), dataImage.getMat().cols() + testImage.getMat().cols(), CvType.CV_8UC4);
 			    Features2d.drawMatches(dataImage.getMat(), dataKeyPoints, testImage.getMat(), testKeyPoints, matches, matMatches, matchColor, pointColor, new MatOfByte(), Features2d.DRAW_OVER_OUTIMG);
 			    matchIcon.setImage(new ImageData(matMatches).getImage());
+			    
+			    // test
+			    new Dictionary(null, 0);
 			    
 				// compare SURF with ORB
 				

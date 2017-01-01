@@ -9,9 +9,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Range;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+
+import processing.NumberPlateExtractor;
+import processing.RoIExtractor;
 
 public class ImageData {
 	private Mat mat;
@@ -70,6 +75,25 @@ public class ImageData {
 		float ratio = mat.width() / (float)mat.height();
 		int height = (int)(width / ratio);
 		resize(new Size(width, height));
+	}
+	
+	
+	public Mat extractRoI() {
+		// make gray
+		Mat gray = new Mat();
+		Imgproc.cvtColor(getMat(), gray, Imgproc.COLOR_BGR2GRAY);
+		
+		// detect number plate
+		Mat matRoI = null;
+		Range rowRange = new Range();
+		Range colRange = new Range();
+		NumberPlateExtractor.calculateCropOffset(gray, rowRange, colRange);
+		Mat sub = gray.submat(rowRange, colRange);
+		Rect rect = NumberPlateExtractor.extract(sub);
+		if (rect != null) {
+			matRoI = RoIExtractor.extract(sub, rect);
+		}
+		return matRoI;
 	}
 	
 	

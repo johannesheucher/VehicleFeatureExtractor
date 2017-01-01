@@ -1,8 +1,11 @@
 package processing;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 public class RoIExtractor {
 	
@@ -33,6 +36,13 @@ public class RoIExtractor {
 		Range rowRange = new Range((int)Math.max(numberPlate.y - ROI_TOP_FACTOR * w, 0), (int)Math.min(numberPlate.y + h + ROI_BOTTOM_FACTOR * w, src.rows() - 1));
 		Range colRange = new Range((int)Math.max(numberPlate.x - ROI_LEFT_FACTOR * w, 0), (int)Math.min(numberPlate.x + w + ROI_RIGHT_FACTOR * w, src.cols() - 1));
 		
-		return src.submat(rowRange, colRange);
+		Mat submat = src.submat(rowRange, colRange);
+		
+		// delete content of number plate
+		Point p = new Point(numberPlate.x - colRange.start, numberPlate.y - rowRange.start);
+		Point q = new Point(numberPlate.x + numberPlate.width - colRange.start, numberPlate.y + numberPlate.height - rowRange.start);
+		Imgproc.rectangle(submat, p, q, new Scalar(0), -1);
+		
+		return submat;
 	}
 }
