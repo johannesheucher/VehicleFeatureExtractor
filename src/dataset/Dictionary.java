@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.TermCriteria;
 
 import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
@@ -18,6 +20,12 @@ public class Dictionary {
 	
 	public Dictionary(List<Mat> descriptors, int size) {
 		codewords = new ArrayList<>(size);
+		
+		Core.kmeans(data, K, bestLabels, criteria, attempts, flags, centers)
+//		
+//		don't lose time to find a way to use custom attributes.
+//		Split ORB descriptor into 32 values (32 double attributes).
+//		Maybe a custom distance function is necessary, because d(descMat, descMat) might be calculated other than by euklidean distance.
 		
 		// TODO
 		// cluster descriptors (with kNN) into \size clusters (each cluster is one codeword of the dictionary)
