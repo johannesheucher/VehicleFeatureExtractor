@@ -1,5 +1,6 @@
 package processing;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorExtractor;
@@ -22,6 +23,10 @@ public class FeatureExtractor {
 		
 		// extract descriptors
 		detector.detect(src, keyPoints);
+//		Mat descriptors8u = new Mat();
 		descriptorExtractor.compute(src, keyPoints, descriptors);
+		
+		// convert descriptors' type from U8 to 32F
+//		descriptors8u.convertTo(descriptors, CvType.CV_32F);
 	}
 }

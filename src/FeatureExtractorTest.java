@@ -30,8 +30,8 @@ public class FeatureExtractorTest {
 	
 	public FeatureExtractorTest() {
 		// load two similar images (maybe already a vehicle RoI)
-		ImageData dataImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_data_corsa.png"));
-		ImageData testImage = new ImageData(new File("D:/workspaces/Vehicle Data/0_test_corsa.png"));
+		ImageData dataImage = new ImageData(new File("D:/workspaces/Vehicle Data/featuretest/0_data_corsa.png"));
+		ImageData testImage = new ImageData(new File("D:/workspaces/Vehicle Data/featuretest/0_test_corsa.png"));
 		
 		ImageIcon dataIcon = new ImageIcon(dataImage.getImage());
 		ImageIcon testIcon = new ImageIcon(testImage.getImage());
@@ -73,7 +73,7 @@ public class FeatureExtractorTest {
 				testIcon.setImage(new ImageData(rgb).getImage());
 				
 				// match features
-				DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+				DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMINGLUT);
 				MatOfDMatch matches = new MatOfDMatch();
 			    matcher.match(dataDescriptors, testDescriptors, matches);
 				
@@ -85,9 +85,6 @@ public class FeatureExtractorTest {
 			    Mat matMatches = new Mat(Math.max(dataImage.getMat().rows(), testImage.getMat().rows()), dataImage.getMat().cols() + testImage.getMat().cols(), CvType.CV_8UC4);
 			    Features2d.drawMatches(dataImage.getMat(), dataKeyPoints, testImage.getMat(), testKeyPoints, matches, matMatches, matchColor, pointColor, new MatOfByte(), Features2d.DRAW_OVER_OUTIMG);
 			    matchIcon.setImage(new ImageData(matMatches).getImage());
-			    
-			    // test
-			    new Dictionary(null, 0);
 			    
 				// compare SURF with ORB
 				

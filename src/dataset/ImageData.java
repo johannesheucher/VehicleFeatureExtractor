@@ -22,14 +22,21 @@ public class ImageData {
 	private Mat mat;
 	private BufferedImage image;
 	private boolean imageOutdated = true;
+	private String name;
 	
 	public ImageData(File filename) {
 		this(Imgcodecs.imread(filename.toString()));
+		name = filename.getName();
 	}
 	
 	
 	public ImageData(Mat mat) {
 		setMat(mat);
+	}
+	
+	
+	public String getName() {
+		return name;
 	}
 	
 	

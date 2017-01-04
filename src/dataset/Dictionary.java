@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.TermCriteria;
 
+import processing.bow.BOWKMeansTrainer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -15,20 +17,25 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class Dictionary {
-	// TODO: Codewords
-	private List<Mat> codewords;
+	private Mat codewords = new Mat();
 	
 	public Dictionary(List<Mat> descriptors, int size) {
-		codewords = new ArrayList<>(size);
+		TermCriteria termCriteria = new TermCriteria(TermCriteria.COUNT, 100, 1);
+		BOWKMeansTrainer trainer = new BOWKMeansTrainer(size, termCriteria, 1, Core.KMEANS_PP_CENTERS);
+		for (Mat entry : descriptors) {
+			Mat entry32f = new Mat();
+			entry.convertTo(entry32f, CvType.CV_32F);
+			trainer.add(entry32f);
+		}
+		Mat codewords32f = trainer.cluster();
+		codewords32f.convertTo(codewords, CvType.CV_8UC1);
 		
-		Core.kmeans(data, K, bestLabels, criteria, attempts, flags, centers)
-//		
 //		don't lose time to find a way to use custom attributes.
 //		Split ORB descriptor into 32 values (32 double attributes).
 //		Maybe a custom distance function is necessary, because d(descMat, descMat) might be calculated other than by euklidean distance.
 		
 		// TODO
-		// cluster descriptors (with kNN) into \size clusters (each cluster is one codeword of the dictionary)
+		// cluster descriptors (with k-means) into \size clusters (each cluster is one codeword of the dictionary)
 		Attribute att0 = new Attribute("horsePower");
 		Attribute att1 = new Attribute("weight");
 		Attribute att2 = new Attribute("make", Arrays.asList("Porsche", "Mazda", "VW"));
@@ -87,5 +94,10 @@ public class Dictionary {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public Mat getCodewords() {
+		return codewords;
 	}
 }
