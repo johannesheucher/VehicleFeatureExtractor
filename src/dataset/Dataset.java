@@ -25,18 +25,36 @@ public class Dataset {
     };
 	
     
-	public Dataset(File imagePath) {
+    /**
+     * 
+     * @param imagePath
+     * @param normalize Turns images to gray and resizes them to the standard width specified in Const
+     */
+	public Dataset(File imagePath, boolean normalize) {
 		imageList = new ArrayList<>();
-		
+		addData(imagePath, normalize);
+	}
+	
+	
+	/**
+     * 
+     * @param imagePath
+     * @param normalize Turns images to gray and resizes them to the standard width specified in Const
+     */
+	public void addData(File imagePath, boolean normalize) {
 		// load all images from image path
 		if (imagePath.isDirectory()) {
             for (final File f : imagePath.listFiles(IMAGE_FILTER)) {
             	ImageData image = new ImageData(f);
             	
-            	// resize all images so that they have the same size (at least width, aspect ratio not important, only for RoI)
-        		// This is important because the filter kernels have a distinct size and the car in each image should cover a more or less
-        		// constant percentage of area of the image.
-            	image.resize(Const.IMAGE_WIDTH);
+            	if (normalize) {
+	            	// resize all images so that they have the same size (at least width, aspect ratio not important, only for RoI)
+	        		// This is important because the filter kernels have a distinct size and the car in each image should cover a more or less
+	        		// constant percentage of area of the image.
+	            	image.resize(Const.IMAGE_WIDTH);
+	            	
+	            	image.toGray();
+            	}
             	
             	// extract RoI
             	// subtask - extract number plate rectangle

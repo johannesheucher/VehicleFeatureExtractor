@@ -40,7 +40,7 @@ public class NumberPlateExtractorTest {
 	int pictureIndex = 0;
 	
 	public NumberPlateExtractorTest() {
-		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"));
+		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"), true);
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
 		grayImage = (ImageData)sourceImage.clone();
@@ -124,7 +124,7 @@ public class NumberPlateExtractorTest {
 				//sourceImage.needsRefreshImage();
 				//icon0.setImage(sourceImage.getImage());
 				
-				NumberPlateExtractor.toGray(sourceImage.getMat(), grayImage.getMat());
+				grayImage = (ImageData)sourceImage.clone();
 				
 				// detect number plate
 				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();

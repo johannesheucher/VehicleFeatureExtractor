@@ -17,11 +17,13 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class Dictionary {
+	private int size;
 	private Mat codewords = new Mat();
 	
 	public Dictionary(List<Mat> descriptors, int size) {
+		this.size = size;
 		TermCriteria termCriteria = new TermCriteria(TermCriteria.COUNT, 100, 1);
-		BOWKMeansTrainer trainer = new BOWKMeansTrainer(size, termCriteria, 1, Core.KMEANS_PP_CENTERS);
+		BOWKMeansTrainer trainer = new BOWKMeansTrainer(getSize(), termCriteria, 1, Core.KMEANS_PP_CENTERS);
 		for (Mat entry : descriptors) {
 			Mat entry32f = new Mat();
 			entry.convertTo(entry32f, CvType.CV_32F);
@@ -99,5 +101,10 @@ public class Dictionary {
 	
 	public Mat getCodewords() {
 		return codewords;
+	}
+	
+	
+	public int getSize() {
+		return size;
 	}
 }

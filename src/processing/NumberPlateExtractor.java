@@ -107,11 +107,6 @@ public class NumberPlateExtractor {
 	}
 	
 	
-	public static void toGray(Mat src, Mat dst) {
-		Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2GRAY);
-	}
-	
-	
 	public static void topHat(Mat src, Mat dst, Size kernelSize) {
 		// morphological operation - Top Hat (difference between image and opening of the image)
 		Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, kernelSize);

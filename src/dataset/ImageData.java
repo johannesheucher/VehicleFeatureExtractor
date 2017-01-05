@@ -85,6 +85,12 @@ public class ImageData {
 	}
 	
 	
+	public void toGray() {
+		Imgproc.cvtColor(getMat(), getMat(), Imgproc.COLOR_BGR2GRAY);
+		needsRefreshImage();
+	}
+	
+	
 	public Mat extractRoI() {
 		// make gray
 		Mat gray = new Mat();
