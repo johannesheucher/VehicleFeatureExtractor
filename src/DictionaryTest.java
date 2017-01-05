@@ -20,7 +20,7 @@ import processing.FeatureExtractor;
 import processing.NumberPlateExtractor;
 
 public class DictionaryTest {
-	private static final int DICTIONARY_SIZE = 50;
+	private static final int DICTIONARY_SIZE = 150;
 	
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
@@ -52,9 +52,10 @@ public class DictionaryTest {
 	    saveHistograms(testSet, histograms, "histograms.csv");
 	    
 	    // build confusion matrix
-	    double[][] confusionMatrix = new double[dictionary.getSize()][dictionary.getSize()];		too big! shall only be testData.length!
-	    for (int i = 0; i < histograms.size(); i++) {
-	    	for (int j = 0; j < histograms.size(); j++) {
+	    int numImages = testSet.getImageList().size();
+	    double[][] confusionMatrix = new double[numImages][numImages];
+	    for (int i = 0; i < numImages; i++) {
+	    	for (int j = 0; j < numImages; j++) {
 	    		confusionMatrix[i][j] = ssd(histograms.get(i), histograms.get(j));
 	    	}
 	    }
