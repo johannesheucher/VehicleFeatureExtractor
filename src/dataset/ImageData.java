@@ -23,15 +23,22 @@ public class ImageData {
 	private BufferedImage image;
 	private boolean imageOutdated = true;
 	private String name;
+	private File filename;
 	
 	public ImageData(File filename) {
 		this(Imgcodecs.imread(filename.toString()));
+		this.filename = filename;
 		name = filename.getName();
 	}
 	
 	
 	public ImageData(Mat mat) {
 		setMat(mat);
+	}
+	
+	
+	public File getFilename() {
+		return filename;
 	}
 	
 	
@@ -112,7 +119,10 @@ public class ImageData {
 	
 	@Override
 	public Object clone() {
-		return new ImageData(mat.clone());
+		ImageData cloned = new ImageData(mat.clone());
+		cloned.filename = getFilename();
+		cloned.name = getName();
+		return cloned;
 	}
 	
 	

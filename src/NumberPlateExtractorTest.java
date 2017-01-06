@@ -3,9 +3,11 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -33,14 +35,18 @@ import processing.RoIExtractor;
 
 public class NumberPlateExtractorTest {
 	
+	private static final String INPUT_PATH = "D:/workspaces/Vehicle Data/";
+	private static final String OUTPUT_PATH = "D:/workspaces/Vehicle Data/training/";
+	
 	ImageData sourceImage;
 	ImageData grayImage;
+	ImageData roiImage;
 	JFrame frame;
 	
 	int pictureIndex = 0;
 	
 	public NumberPlateExtractorTest() {
-		Dataset dataset = new Dataset(new File("D:/workspaces/Vehicle Data/"), true);
+		Dataset dataset = new Dataset(new File(INPUT_PATH), true);
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
 		grayImage = (ImageData)sourceImage.clone();
@@ -77,10 +83,10 @@ public class NumberPlateExtractorTest {
 		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
 		// double rho, int threshold, double minlength, double maxgap
 		
-		JCheckBox showBinary = new JCheckBox("Binary", true);
-		JCheckBox showEdges = new JCheckBox("Edges", true);
+		JCheckBox showBinary = new JCheckBox("Binary", false);
+		JCheckBox showEdges = new JCheckBox("Edges", false);
 		JCheckBox showContours = new JCheckBox("Contours", true);
-		JCheckBox showRect = new JCheckBox("Rect", true);
+		JCheckBox showRect = new JCheckBox("Rect", false);
 		JCheckBox showRoI = new JCheckBox("RoI", true);
 		
 		sliderPanel.add(showBinary);
@@ -111,6 +117,9 @@ public class NumberPlateExtractorTest {
 		sliderPanel.add(houghSliderMaxGap);
 		JLabel houghLabel = new JLabel("no value");
 		sliderPanel.add(houghLabel);
+		
+		JButton saveButton = new JButton("save");
+		sliderPanel.add(saveButton);
 		
 		
 		ChangeListener sliderChangeListener = new ChangeListener() {
@@ -181,9 +190,11 @@ public class NumberPlateExtractorTest {
 				// show RoI
 				if (showRoI.isSelected() && matRoI != null) {
 					icon4Label.setVisible(true);
-					icon4.setImage(new ImageData(matRoI).getImage());
+					roiImage = new ImageData(matRoI);
+					icon4.setImage(roiImage.getImage());
 				} else {
 					icon4Label.setVisible(false);
+					roiImage = null;
 				}
 				
 				// update
@@ -214,6 +225,23 @@ public class NumberPlateExtractorTest {
 		};
 		nextPictureButton.addActionListener(buttonListener);
 		
+		ActionListener saveListener = new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// save RoI
+				if (roiImage != null) {
+					File outputfile = new File(OUTPUT_PATH + sourceImage.getName());
+					try {
+						ImageIO.write(roiImage.getImage(), sourceImage.getName().substring(sourceImage.getName().lastIndexOf(".") + 1), outputfile);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		};
+		saveButton.addActionListener(saveListener);
+		
 		ChangeListener checkBoxListener = new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -227,10 +255,10 @@ public class NumberPlateExtractorTest {
 		showRoI.addChangeListener(checkBoxListener);
 		
 		// add resulting image
-		frame.getContentPane().add(icon0Label);
-		frame.getContentPane().add(icon1Label);
+//		frame.getContentPane().add(icon0Label);
+//		frame.getContentPane().add(icon1Label);
 		frame.getContentPane().add(icon2Label);
-		frame.getContentPane().add(icon3Label);
+//		frame.getContentPane().add(icon3Label);
 		frame.getContentPane().add(icon4Label);
 		frame.pack();
 		frame.setVisible(true);
