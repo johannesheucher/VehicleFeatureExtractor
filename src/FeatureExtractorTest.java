@@ -22,7 +22,6 @@ import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
-import dataset.Dictionary;
 import dataset.ImageData;
 import processing.FeatureExtractor;
 

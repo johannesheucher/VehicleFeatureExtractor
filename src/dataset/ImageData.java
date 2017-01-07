@@ -4,6 +4,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -49,9 +51,26 @@ public class ImageData {
 	}
 	
 	
+	public String getMake() {
+//		Pattern p = Pattern.compile("([^_]+)\\w*");
+//		String name = getName().toLowerCase();
+//		Matcher matcher = p.matcher(name);
+//		matcher.find();
+		String[] parts = getName().toLowerCase().split("_");
+		return parts[0];
+	}
+	
+	
+	public String getModel() {
+//		Matcher matcher = Pattern.compile("[^_]+_([^_]+)\\w*").matcher(getName().toLowerCase());
+//		matcher.find();
+		String[] parts = getName().toLowerCase().split("_");
+		return parts[1];
+	}
+	
+	
 	public String getMakeModel() {
-		// TODO
-		return "";
+		return getMake() + " " + getModel();
 	}
 	
 	

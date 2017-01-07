@@ -94,7 +94,7 @@ public class DictionaryTest {
 		
 		builder.append(System.lineSeparator() + "@data" + System.lineSeparator());
 		for (BoFHistogram histogram : histograms) {
-			builder.append(histogram.getSource().getMakeModel() + ",");
+			builder.append(histogram.getSource().getMakeModel() + ",");		TODO: filter out multiples
 			builder.append(histogram.toCSV() + System.lineSeparator());
 		}
 		
