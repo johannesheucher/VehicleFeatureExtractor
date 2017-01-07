@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -13,11 +12,11 @@ import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorMatcher;
 
+import dataset.BoFHistogram;
 import dataset.Dataset;
 import dataset.Dictionary;
 import dataset.ImageData;
 import processing.FeatureExtractor;
-import processing.NumberPlateExtractor;
 
 public class DictionaryTest {
 	private static final int DICTIONARY_SIZE = 150;
@@ -25,7 +24,7 @@ public class DictionaryTest {
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		Dataset trainingSet = new Dataset(new File("D:/workspaces/Vehicle Data/dictionarytest/train"), true);
+		Dataset trainingSet = new Dataset(new File("D:/workspaces/VehicleData/training"), true);
 		
 		List<Mat> trainingDescriptorsList = new ArrayList<>();
 		for (ImageData image : trainingSet.getImageList()) {
@@ -38,40 +37,69 @@ public class DictionaryTest {
 	    
 	    // test dictionary with both training set and test set
 	    // build histograms
-	    Dataset testSet = new Dataset(new File("D:/workspaces/Vehicle Data/dictionarytest/train"), true);
-	    testSet.addData(new File("D:/workspaces/Vehicle Data/dictionarytest/test"), true);
-	    List<double[]> histograms = new ArrayList<>();
+	    Dataset testSet = new Dataset(new File("D:/workspaces/VehicleData/training"), true);
+	    //testSet.addData(new File("D:/workspaces/VehicleData/dictionarytest/test"), true);
+	    List<BoFHistogram> histograms = new ArrayList<>();
 	    for (ImageData image : testSet.getImageList()) {
-	    	histograms.add(getHistogram(image, dictionary));
+	    	histograms.add(new BoFHistogram(image, dictionary));
 	    	double sum = 0;
-	    	for (double bin : histograms.get(histograms.size() - 1)) {
+	    	for (Double bin : histograms.get(histograms.size() - 1).getValues()) {
 		    	sum += bin;
 		    }
 	    	System.out.println("sum = " + sum);
 	    }
-	    saveHistograms(testSet, histograms, "histograms.csv");
+	    toArff(histograms, new File("vehicles.arff"));
 	    
-	    // build confusion matrix
-	    int numImages = testSet.getImageList().size();
-	    double[][] confusionMatrix = new double[numImages][numImages];
-	    for (int i = 0; i < numImages; i++) {
-	    	for (int j = 0; j < numImages; j++) {
-	    		confusionMatrix[i][j] = ssd(histograms.get(i), histograms.get(j));
-	    	}
-	    }
-	    BufferedWriter writer = new BufferedWriter(new FileWriter("confusion.csv"));
-	    StringBuilder builder = new StringBuilder();
-	    
-	    for (int i = 0; i < confusionMatrix.length; i++) {
-	    	for (int j = 0; j < confusionMatrix.length; j++) {
-	    		if (j == 0) {
-	    			builder.append(testSet.getImageList().get(i).getName() + ",");
-	    		}
-	    		builder.append(String.valueOf(confusionMatrix[i][j]) + ",");
-	    	}
-	    	builder.append(System.lineSeparator());
-	    }
-	    writer.write(builder.toString());
+//	    // build confusion matrix
+//	    int numImages = testSet.getImageList().size();
+//	    double[][] confusionMatrix = new double[numImages][numImages];
+//	    for (int i = 0; i < numImages; i++) {
+//	    	for (int j = 0; j < numImages; j++) {
+//	    		confusionMatrix[i][j] = ssd(histograms.get(i), histograms.get(j));
+//	    	}
+//	    }
+//	    BufferedWriter writer = new BufferedWriter(new FileWriter("confusion.csv"));
+//	    StringBuilder builder = new StringBuilder();
+//	    
+//	    for (int i = 0; i < confusionMatrix.length; i++) {
+//	    	for (int j = 0; j < confusionMatrix.length; j++) {
+//	    		if (j == 0) {
+//	    			builder.append(testSet.getImageList().get(i).getName() + ",");
+//	    		}
+//	    		builder.append(String.valueOf(confusionMatrix[i][j]) + ",");
+//	    	}
+//	    	builder.append(System.lineSeparator());
+//	    }
+//	    writer.write(builder.toString());
+//		writer.close();
+	}
+	
+	
+	public static void toArff(List<BoFHistogram> histograms, File filename) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		builder.append("@relation " + filename.getName() + System.lineSeparator() + System.lineSeparator());
+		
+		// attributes
+		StringBuilder classesBuilder = new StringBuilder();
+		for (BoFHistogram histogram : histograms) {
+			classesBuilder.append(histogram.getSource().getMakeModel());
+			classesBuilder.append(",");
+		}
+		classesBuilder.deleteCharAt(classesBuilder.length() - 1);
+		builder.append("@attribute makemodel {" + classesBuilder.toString() + "}" + System.lineSeparator());
+		
+		for (int i = 0; i < histograms.get(0).getValues().size(); i++) {
+			builder.append("@attribute feature" + String.valueOf(i) + " numeric" + System.lineSeparator());
+		}
+		
+		builder.append(System.lineSeparator() + "@data" + System.lineSeparator());
+		for (BoFHistogram histogram : histograms) {
+			builder.append(histogram.getSource().getMakeModel() + ",");
+			builder.append(histogram.toCSV() + System.lineSeparator());
+		}
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+		writer.write(builder.toString());
 		writer.close();
 	}
 	
@@ -104,7 +132,7 @@ public class DictionaryTest {
 	}
 	
 	
-	public static void saveHistograms(Dataset dataset, List<double[]> histograms, String filename) throws IOException {
+	public static void saveHistograms(Dataset dataset, List<BoFHistogram> histograms, String filename) throws IOException {
 		// write histograms to file
 	    BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
 	    StringBuilder builder = new StringBuilder();
@@ -118,7 +146,7 @@ public class DictionaryTest {
 	    // - data
 		for (int i = 0; i < dataset.getImageList().size(); i++) {
 		    builder.append(dataset.getImageList().get(i).getName() + ",");
-		    for (double bin : histograms.get(i)) {
+		    for (double bin : histograms.get(i).getValues()) {
 		    	builder.append(String.valueOf(bin) + ",");
 		    }
 		    builder.append(System.lineSeparator());

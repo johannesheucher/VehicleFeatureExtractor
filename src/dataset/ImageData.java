@@ -22,8 +22,10 @@ public class ImageData {
 	private Mat mat;
 	private BufferedImage image;
 	private boolean imageOutdated = true;
+	
 	private String name;
 	private File filename;
+	
 	
 	public ImageData(File filename) {
 		this(Imgcodecs.imread(filename.toString()));
@@ -44,6 +46,12 @@ public class ImageData {
 	
 	public String getName() {
 		return name;
+	}
+	
+	
+	public String getMakeModel() {
+		// TODO
+		return "";
 	}
 	
 	

@@ -35,8 +35,8 @@ import processing.RoIExtractor;
 
 public class NumberPlateExtractorTest {
 	
-	private static final String INPUT_PATH = "D:/workspaces/Vehicle Data/";
-	private static final String OUTPUT_PATH = "D:/workspaces/Vehicle Data/training/";
+	private static final String INPUT_PATH = "D:/workspaces/VehicleData/";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	
 	ImageData sourceImage;
 	ImageData grayImage;
