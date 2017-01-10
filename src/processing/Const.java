@@ -1,7 +1,7 @@
 package processing;
 
 public class Const {
-	public static final int IMAGE_WIDTH = 600;
+	public static final int IMAGE_WIDTH = 300;
 	
 	public static final float NUMBER_PLATE_ASPECT_RATIO = 4.3f;
 	public static final float NUMBER_PLATE_ASPECT_RATIO_EPSILON = 0.75f;

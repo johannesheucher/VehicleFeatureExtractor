@@ -3,7 +3,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.opencv.core.Core;
 import org.opencv.core.DMatch;
@@ -80,13 +83,21 @@ public class DictionaryTest {
 		builder.append("@relation " + filename.getName() + System.lineSeparator() + System.lineSeparator());
 		
 		// attributes
-		StringBuilder classesBuilder = new StringBuilder();
+		Set<String> makemodels = new HashSet<>();
 		for (BoFHistogram histogram : histograms) {
-			classesBuilder.append(histogram.getSource().getMakeModel());
-			classesBuilder.append(",");
+			String makemodel = histogram.getSource().getMakeModel();
+			if (makemodel.contains("porsche") || makemodel.contains("golf") || makemodel.contains("corsa")) {
+				makemodels.add(makemodel);
+			}
 		}
-		classesBuilder.deleteCharAt(classesBuilder.length() - 1);
-		builder.append("@attribute makemodel {" + classesBuilder.toString() + "}" + System.lineSeparator());
+		StringBuilder makemodelBuilder = new StringBuilder();
+		Iterator<String> makemodelIterator = makemodels.iterator();
+		while (makemodelIterator.hasNext()) {
+			makemodelBuilder.append(makemodelIterator.next());
+			makemodelBuilder.append(",");
+		}
+		makemodelBuilder.deleteCharAt(makemodelBuilder.length() - 1);
+		builder.append("@attribute makemodel {" + makemodelBuilder.toString() + "}" + System.lineSeparator());
 		
 		for (int i = 0; i < histograms.get(0).getValues().size(); i++) {
 			builder.append("@attribute feature" + String.valueOf(i) + " numeric" + System.lineSeparator());
@@ -94,8 +105,11 @@ public class DictionaryTest {
 		
 		builder.append(System.lineSeparator() + "@data" + System.lineSeparator());
 		for (BoFHistogram histogram : histograms) {
-			builder.append(histogram.getSource().getMakeModel() + ",");		TODO: filter out multiples
-			builder.append(histogram.toCSV() + System.lineSeparator());
+			String makemodel = histogram.getSource().getMakeModel();
+			if (makemodels.contains(makemodel)) {
+				builder.append(makemodel + ",");
+				builder.append(histogram.toCSV() + System.lineSeparator());
+			}
 		}
 		
 		BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
