@@ -33,7 +33,7 @@ import dataset.ImageData;
 import processing.NumberPlateExtractor;
 import processing.RoIExtractor;
 
-public class NumberPlateExtractorTest {
+public class NumberPlateExtractorTestApp {
 	
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
@@ -45,7 +45,7 @@ public class NumberPlateExtractorTest {
 	
 	int pictureIndex = 0;
 	
-	public NumberPlateExtractorTest() {
+	public NumberPlateExtractorTestApp() {
 		Dataset dataset = new Dataset(new File(INPUT_PATH), true);
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
@@ -274,6 +274,6 @@ public class NumberPlateExtractorTest {
 	
 	public static void main(String[] args) {
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-		new NumberPlateExtractorTest();
+		new NumberPlateExtractorTestApp();
 	}
 }

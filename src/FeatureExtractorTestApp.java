@@ -25,9 +25,9 @@ import org.opencv.imgproc.Imgproc;
 import dataset.ImageData;
 import processing.FeatureExtractor;
 
-public class FeatureExtractorTest {
+public class FeatureExtractorTestApp {
 	
-	public FeatureExtractorTest() {
+	public FeatureExtractorTestApp() {
 		// load two similar images (maybe already a vehicle RoI)
 		ImageData dataImage = new ImageData(new File("D:/workspaces/VehicleData/featuretest/0_data_corsa.png"));
 		ImageData testImage = new ImageData(new File("D:/workspaces/VehicleData/featuretest/0_test_corsa.png"));
@@ -106,6 +106,6 @@ public class FeatureExtractorTest {
 	
 	public static void main(String[] args) {
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-		new FeatureExtractorTest();
+		new FeatureExtractorTestApp();
 	}
 }

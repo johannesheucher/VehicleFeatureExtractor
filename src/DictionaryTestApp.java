@@ -21,7 +21,7 @@ import dataset.Dictionary;
 import dataset.ImageData;
 import processing.FeatureExtractor;
 
-public class DictionaryTest {
+public class DictionaryTestApp {
 	private static final int DICTIONARY_SIZE = 150;
 	
 	public static void main(String[] args) throws IOException {
