@@ -25,13 +25,12 @@ import org.opencv.imgproc.Imgproc;
 import dataset.Dataset;
 import dataset.ImageData;
 import dataset.NumberPlateMetaFile;
-import processing.Const;
 
 
 public class NumberPlatePlacerApp {
 	private static final String PATH = "D:/workspaces/VehicleData/";
 	
-	private static final String NUMBER_PLATE_FILENAME = "NumberPlates.csv";
+	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final double IMAGE_SCALE = 0.3;
 	
 	private JFrame frame;
@@ -46,7 +45,6 @@ public class NumberPlatePlacerApp {
 	public NumberPlatePlacerApp() {
 		Dataset dataset = new Dataset(new File(PATH), false);
 		for (ImageData image : dataset.getImageList()) {
-			//image.resize(image.getImage().getWidth() / 2);
 			image.resize((int)(image.getMat().cols() * IMAGE_SCALE));
 		}
 		pictureIndex = 0;
@@ -88,6 +86,29 @@ public class NumberPlatePlacerApp {
 		JButton nextPictureButton = new JButton(">");
 		nextPictureButton.addActionListener(nextListener);
 		sliderPanel.add(nextPictureButton);
+		
+		ActionListener nextWithoutListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Rect rect = null;
+				ImageData lastSourceImage = sourceImage;
+				do {
+					pictureIndex++;
+					if (pictureIndex >= dataset.getImageList().size()) {
+						pictureIndex = 0;
+					}
+					sourceImage = dataset.getImageList().get(pictureIndex);
+					String vehicleKey = getVehicleKey();
+					rect = numberPlateMeta.getRect(vehicleKey);
+				} while (rect != null && sourceImage != lastSourceImage);
+				
+				showNumberPlate();
+			}
+		};
+		JButton nextWithoutPictureButton = new JButton(">>");
+		nextWithoutPictureButton.addActionListener(nextWithoutListener);
+		sliderPanel.add(nextWithoutPictureButton);
+		
 		ActionListener prevListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

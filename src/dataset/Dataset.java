@@ -11,7 +11,7 @@ import processing.Const;
 public class Dataset {
 	private ArrayList<ImageData> imageList;
 	
-	private static final String[] EXTENSIONS = new String[] { "png", "jpg", "jpeg" };
+	private static final String[] EXTENSIONS = new String[] { "png", "PNG", "jpg", "JPG", "jpeg", "JPEG" };
 	private static final FilenameFilter IMAGE_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(final File dir, final String name) {
