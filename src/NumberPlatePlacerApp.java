@@ -7,6 +7,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -41,11 +43,16 @@ public class NumberPlatePlacerApp {
 	private int pictureIndex;
 	private NumberPlateMetaFile numberPlateMeta;
 	private int sizeToggle;
+	private Map<String, Double> imageScale;
 	
 	public NumberPlatePlacerApp() {
 		Dataset dataset = new Dataset(new File(PATH), false);
+		imageScale = new HashMap<>();
 		for (ImageData image : dataset.getImageList()) {
-			image.resize((int)(image.getMat().cols() * IMAGE_SCALE));
+			if (image.getMat().cols() > 1200) {
+				image.resize((int)(image.getMat().cols() * IMAGE_SCALE));
+				imageScale.put(image.getName(), IMAGE_SCALE);
+			}
 		}
 		pictureIndex = 0;
 		sizeToggle = 1;
@@ -132,8 +139,9 @@ public class NumberPlatePlacerApp {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				int x = (int)(e.getX() / IMAGE_SCALE);
-				int y = (int)(e.getY() / IMAGE_SCALE);
+				double scale = imageScale.getOrDefault(sourceImage.getName(), 1.0);
+				int x = (int)(e.getX() / scale);
+				int y = (int)(e.getY() / scale);
 				Rect previousRect = numberPlateMeta.getRect(getVehicleKey());
 				if (previousRect == null) {
 					previousRect = new Rect();
@@ -181,7 +189,8 @@ public class NumberPlatePlacerApp {
 		String vehicleKey = getVehicleKey();
 		Rect rect = numberPlateMeta.getRect(vehicleKey);
 		if (rect != null) {
-			Rect scaledRect = new Rect(new Point(rect.x * IMAGE_SCALE, rect.y * IMAGE_SCALE), new Size(rect.width * IMAGE_SCALE, rect.height * IMAGE_SCALE));
+			double scale = imageScale.getOrDefault(sourceImage.getName(), 1.0);
+			Rect scaledRect = new Rect(new Point(rect.x * scale, rect.y * scale), new Size(rect.width * scale, rect.height * scale));
 			Imgproc.rectangle(dataImage.getMat(), new Point(scaledRect.x,  scaledRect.y), new Point(scaledRect.x + scaledRect.width, scaledRect.y + scaledRect.height), new Scalar(255, 170, 255), 2);
 		}
 
