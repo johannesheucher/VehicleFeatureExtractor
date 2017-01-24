@@ -22,12 +22,15 @@ import dataset.ImageData;
 import processing.FeatureExtractor;
 
 public class DictionaryTestApp {
-	private static final int DICTIONARY_SIZE = 150;
+	private static final int DICTIONARY_SIZE = 200;
+	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
+	private static final String ARFF_FILENAME = "_vehicles.arff";
 	
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		Dataset trainingSet = new Dataset(new File("D:/workspaces/VehicleData/training"), true);
+		Dataset trainingSet = new Dataset(new File(INPUT_PATH), false);
 		
 		List<Mat> trainingDescriptorsList = new ArrayList<>();
 		for (ImageData image : trainingSet.getImageList()) {
@@ -38,12 +41,9 @@ public class DictionaryTestApp {
 	    Dictionary dictionary = new Dictionary(trainingDescriptorsList, DICTIONARY_SIZE);
 	    
 	    
-	    // test dictionary with both training set and test set
 	    // build histograms
-	    Dataset testSet = new Dataset(new File("D:/workspaces/VehicleData/training"), true);
-	    //testSet.addData(new File("D:/workspaces/VehicleData/dictionarytest/test"), true);
 	    List<BoFHistogram> histograms = new ArrayList<>();
-	    for (ImageData image : testSet.getImageList()) {
+	    for (ImageData image : trainingSet.getImageList()) {
 	    	histograms.add(new BoFHistogram(image, dictionary));
 	    	double sum = 0;
 	    	for (Double bin : histograms.get(histograms.size() - 1).getValues()) {
@@ -51,7 +51,7 @@ public class DictionaryTestApp {
 		    }
 	    	System.out.println("sum = " + sum);
 	    }
-	    toArff(histograms, new File("vehicles.arff"));
+	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
 	    
 //	    // build confusion matrix
 //	    int numImages = testSet.getImageList().size();
@@ -86,9 +86,9 @@ public class DictionaryTestApp {
 		Set<String> makemodels = new HashSet<>();
 		for (BoFHistogram histogram : histograms) {
 			String makemodel = histogram.getSource().getMakeModel();
-			if (makemodel.contains("porsche") || makemodel.contains("golf") || makemodel.contains("corsa")) {
+			//if (makemodel.contains("porsche") || makemodel.contains("golf") || makemodel.contains("corsa")) {
 				makemodels.add(makemodel);
-			}
+			//}
 		}
 		StringBuilder makemodelBuilder = new StringBuilder();
 		Iterator<String> makemodelIterator = makemodels.iterator();

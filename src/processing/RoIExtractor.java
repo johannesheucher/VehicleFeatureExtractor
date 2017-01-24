@@ -9,10 +9,10 @@ import org.opencv.imgproc.Imgproc;
 
 public class RoIExtractor {
 	
-	public static final double ROI_TOP_FACTOR = 0.9;
-	public static final double ROI_BOTTOM_FACTOR = 0.2;
-	public static final double ROI_LEFT_FACTOR = 0.9;		// higher value than right, because EU area of number plate is not part of the rect
-	public static final double ROI_RIGHT_FACTOR = 0.8;
+	public static final double ROI_TOP_FACTOR = 0.7;
+	public static final double ROI_BOTTOM_FACTOR = 0.1;
+	public static final double ROI_LEFT_FACTOR = 0.6;		// higher value than right, because EU area of number plate is not part of the rect
+	public static final double ROI_RIGHT_FACTOR = 0.6;
 	
 	/**
 	 * Region of Interest

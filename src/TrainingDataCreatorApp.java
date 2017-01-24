@@ -4,6 +4,7 @@ import java.io.IOException;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import dataset.Dataset;
 import dataset.ImageData;
@@ -15,7 +16,7 @@ public class TrainingDataCreatorApp {
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final int MIN_NUM_VEHICLES = 10;
-	private static final int ROI_WIDTH = 300;
+	private static final int ROI_WIDTH = 500;
 	
 	private NumberPlateMetaFile numberPlateMeta;
 	
@@ -37,6 +38,7 @@ public class TrainingDataCreatorApp {
 				Rect rect = numberPlateMeta.getRect(image.getVehicleKey());
 				if (rect != null) {
 					Mat roi = RoIExtractor.extract(image.getMat(), rect);
+					Imgproc.equalizeHist(roi, roi);
 					ImageData result = new ImageData(roi);
 					result.resize(ROI_WIDTH);
 					result.save(new File(OUTPUT_PATH + image.getName()));
