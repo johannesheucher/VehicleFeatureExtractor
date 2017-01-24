@@ -105,7 +105,7 @@ public class NumberPlatePlacerApp {
 						pictureIndex = 0;
 					}
 					sourceImage = dataset.getImageList().get(pictureIndex);
-					String vehicleKey = getVehicleKey();
+					String vehicleKey = sourceImage.getVehicleKey();
 					rect = numberPlateMeta.getRect(vehicleKey);
 				} while (rect != null && sourceImage != lastSourceImage);
 				
@@ -142,14 +142,14 @@ public class NumberPlatePlacerApp {
 				double scale = imageScale.getOrDefault(sourceImage.getName(), 1.0);
 				int x = (int)(e.getX() / scale);
 				int y = (int)(e.getY() / scale);
-				Rect previousRect = numberPlateMeta.getRect(getVehicleKey());
+				Rect previousRect = numberPlateMeta.getRect(sourceImage.getVehicleKey());
 				if (previousRect == null) {
 					previousRect = new Rect();
 				}
 				if (e.isControlDown()) {
-					numberPlateMeta.setRect(getVehicleKey(), new Rect(x, y, previousRect.width, previousRect.height));
+					numberPlateMeta.setRect(sourceImage.getVehicleKey(), new Rect(x, y, previousRect.width, previousRect.height));
 				} else {
-					numberPlateMeta.setRect(getVehicleKey(), new Rect(new Point(previousRect.x, previousRect.y), new Point(x, y)));
+					numberPlateMeta.setRect(sourceImage.getVehicleKey(), new Rect(new Point(previousRect.x, previousRect.y), new Point(x, y)));
 				}
 				showNumberPlate();
 			}
@@ -186,7 +186,7 @@ public class NumberPlatePlacerApp {
 	
 	private void showNumberPlate() {
 		dataImage = (ImageData)sourceImage.clone();
-		String vehicleKey = getVehicleKey();
+		String vehicleKey = sourceImage.getVehicleKey();
 		Rect rect = numberPlateMeta.getRect(vehicleKey);
 		if (rect != null) {
 			double scale = imageScale.getOrDefault(sourceImage.getName(), 1.0);
@@ -200,11 +200,6 @@ public class NumberPlatePlacerApp {
 		frame.getContentPane().update(frame.getContentPane().getGraphics());
 		frame.setSize(frame.getWidth() + sizeToggle, frame.getHeight() + sizeToggle);		// quirk fix to place images at the top
 		sizeToggle *= -1;
-	}
-	
-	
-	private String getVehicleKey() {
-		return sourceImage.getName().substring(0, sourceImage.getName().lastIndexOf("."));
 	}
 	
 	

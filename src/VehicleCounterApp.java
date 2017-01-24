@@ -12,24 +12,14 @@ import dataset.ImageData;
 
 public class VehicleCounterApp {
 	private static final String PATH = "D:/workspaces/VehicleData/";
-	Map<String, Integer> vehicleCounts;
+	
 	
 	
 	public VehicleCounterApp() {
-		vehicleCounts = new HashMap<>();
 		Dataset dataset = new Dataset(new File(PATH), false);
-		for (ImageData image : dataset.getImageList()) {
-			String makemodel = image.getMakeModel();
-			Integer count = vehicleCounts.get(makemodel);
-			if (count == null) {
-				count = 0;
-			}
-			count++;
-			vehicleCounts.put(makemodel, count);
-		}
 		
-		String[] output = new String[vehicleCounts.size()];
-		Iterator<Entry<String, Integer>> entryIterator = vehicleCounts.entrySet().iterator();
+		String[] output = new String[dataset.getVehicleCounts().size()];
+		Iterator<Entry<String, Integer>> entryIterator = dataset.getVehicleCounts().entrySet().iterator();
 		int i = 0;
 		while (entryIterator.hasNext()) {
 			Entry<String, Integer> entry = entryIterator.next();

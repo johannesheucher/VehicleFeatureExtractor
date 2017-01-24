@@ -72,6 +72,11 @@ public class ImageData {
 	}
 	
 	
+	public String getVehicleKey() {
+		return getName().substring(0, getName().lastIndexOf("."));
+	}
+	
+	
 	public Mat getMat() {
 		return mat;
 	}
@@ -173,5 +178,10 @@ public class ImageData {
 	    final byte[] targetPixels = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
 	    System.arraycopy(b, 0, targetPixels, 0, b.length);
 	    return image;
+	}
+	
+	
+	public void save(File filename) {
+		Imgcodecs.imwrite(filename.toString(), getMat());
 	}
 }

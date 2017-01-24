@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import processing.Const;
 
 public class Dataset {
 	private ArrayList<ImageData> imageList;
+	private Map<String, Integer> vehicleCounts;
 	
 	private static final String[] EXTENSIONS = new String[] { "png", "PNG", "jpg", "JPG", "jpeg", "JPEG" };
 	private static final FilenameFilter IMAGE_FILTER = new FilenameFilter() {
@@ -32,6 +35,7 @@ public class Dataset {
      */
 	public Dataset(File imagePath, boolean normalize) {
 		imageList = new ArrayList<>();
+		vehicleCounts = new HashMap<>();
 		addData(imagePath, normalize);
 	}
 	
@@ -61,6 +65,15 @@ public class Dataset {
             	//List<Point> rectangle = NumberPlateExtractor.extract(image);
             	
             	imageList.add(image);
+            	
+            	// count makemodel
+            	String makemodel = image.getMakeModel();
+            	Integer count = vehicleCounts.get(makemodel);
+    			if (count == null) {
+    				count = 0;
+    			}
+    			count++;
+    			vehicleCounts.put(makemodel, count);
             }
 		}
 	}
@@ -68,5 +81,10 @@ public class Dataset {
 	
 	public List<ImageData> getImageList() {
 		return Collections.unmodifiableList(imageList);
+	}
+	
+	
+	public Map<String, Integer> getVehicleCounts() {
+		return Collections.unmodifiableMap(vehicleCounts);
 	}
 }
