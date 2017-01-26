@@ -12,10 +12,10 @@ import dataset.NumberPlateMetaFile;
 import processing.RoIExtractor;
 
 public class TrainingDataCreatorApp {
-	private static final String INPUT_PATH = "D:/workspaces/VehicleData/";
+	private static final String INPUT_PATH = "D:/workspaces/VehicleData/selection/";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
-	private static final int MIN_NUM_VEHICLES = 10;
+	private static final int MIN_NUM_VEHICLES = 1;
 	private static final int ROI_WIDTH = 500;
 	
 	private NumberPlateMetaFile numberPlateMeta;

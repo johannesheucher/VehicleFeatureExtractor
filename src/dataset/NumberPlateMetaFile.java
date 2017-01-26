@@ -44,7 +44,7 @@ public class NumberPlateMetaFile {
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		String line = reader.readLine();
 		while (line != null) {
-			String[] tokens = line.split(";");
+			String[] tokens = line.split(",");
 			Point p = new Point(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]));
 			Size s = new Size(Integer.parseInt(tokens[3]), Integer.parseInt(tokens[4]));
 			Rect rect = new Rect(p, s);
@@ -63,13 +63,13 @@ public class NumberPlateMetaFile {
 			Entry<String, Rect> entry = entryIterator.next();
 			StringBuilder builder = new StringBuilder();
 			builder.append(entry.getKey());
-			builder.append(";");
+			builder.append(",");
 			builder.append(entry.getValue().x);
-			builder.append(";");
+			builder.append(",");
 			builder.append(entry.getValue().y);
-			builder.append(";");
+			builder.append(",");
 			builder.append(entry.getValue().width);
-			builder.append(";");
+			builder.append(",");
 			builder.append(entry.getValue().height);
 			
 			writer.write(builder.toString());
