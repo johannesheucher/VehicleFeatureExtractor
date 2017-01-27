@@ -15,7 +15,7 @@ public class TrainingDataCreatorApp {
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/selection/";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
-	private static final int MIN_NUM_VEHICLES = 1;
+	private static final int MIN_NUM_VEHICLES = 5;
 	private static final int ROI_WIDTH = 500;
 	
 	private NumberPlateMetaFile numberPlateMeta;
@@ -32,7 +32,7 @@ public class TrainingDataCreatorApp {
 		}
 		
 		for (ImageData image : dataset.getImageList()) {
-			// there must be at least MIN_NUM_VEHICLES vehicles of this makemodel to be proper for training data
+			// there must be at least MIN_NUM_VEHICLES vehicles of this make-model to be proper for training data
 			if (dataset.getVehicleCounts().get(image.getMakeModel()) >= MIN_NUM_VEHICLES) {
 				image.toGray();
 				Rect rect = numberPlateMeta.getRect(image.getVehicleKey());

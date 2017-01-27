@@ -11,7 +11,7 @@ import dataset.Dataset;
 import dataset.ImageData;
 
 public class VehicleCounterApp {
-	private static final String PATH = "D:/workspaces/VehicleData/";
+	private static final String PATH = "D:/workspaces/VehicleData/selection/";
 	
 	
 	
