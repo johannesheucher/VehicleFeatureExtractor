@@ -35,8 +35,8 @@ import processing.RoIExtractor;
 
 public class NumberPlateExtractorTestApp {
 	
-	private static final String INPUT_PATH = "D:/workspaces/VehicleData/";
-	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
+	private static final String INPUT_PATH = "D:/workspaces/Temp Vehicle Data/";
+	private static final String OUTPUT_PATH = "D:/workspaces/Temp Vehicle Data/debug/";
 	
 	ImageData sourceImage;
 	ImageData grayImage;
@@ -83,11 +83,11 @@ public class NumberPlateExtractorTestApp {
 		JSlider houghSliderMaxGap = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
 		// double rho, int threshold, double minlength, double maxgap
 		
-		JCheckBox showBinary = new JCheckBox("Binary", false);
-		JCheckBox showEdges = new JCheckBox("Edges", false);
+		JCheckBox showBinary = new JCheckBox("Binary", true);
+		JCheckBox showEdges = new JCheckBox("Edges", true);
 		JCheckBox showContours = new JCheckBox("Contours", true);
-		JCheckBox showRect = new JCheckBox("Rect", false);
-		JCheckBox showRoI = new JCheckBox("RoI", true);
+		JCheckBox showRect = new JCheckBox("Rect", true);
+		JCheckBox showRoI = new JCheckBox("RoI", false);
 		
 		sliderPanel.add(showBinary);
 		sliderPanel.add(showEdges);
@@ -143,7 +143,7 @@ public class NumberPlateExtractorTestApp {
 				Range rowRange = new Range();
 				Range colRange = new Range();
 				NumberPlateExtractor.calculateCropOffset(grayImage.getMat(), rowRange, colRange);
-				Mat sub = grayImage.getMat().submat(rowRange, colRange);
+				Mat sub = grayImage.getMat();//.submat(rowRange, colRange);
 				Rect rect = NumberPlateExtractor.extract(sub, binary, edges, contours);
 				Imgproc.cvtColor(grayImage.getMat(), finalImage.getMat(), Imgproc.COLOR_GRAY2BGR);
 				if (rect != null) {
@@ -255,10 +255,10 @@ public class NumberPlateExtractorTestApp {
 		showRoI.addChangeListener(checkBoxListener);
 		
 		// add resulting image
-//		frame.getContentPane().add(icon0Label);
-//		frame.getContentPane().add(icon1Label);
+		frame.getContentPane().add(icon0Label);
+		frame.getContentPane().add(icon1Label);
 		frame.getContentPane().add(icon2Label);
-//		frame.getContentPane().add(icon3Label);
+		frame.getContentPane().add(icon3Label);
 		frame.getContentPane().add(icon4Label);
 		frame.pack();
 		frame.setVisible(true);

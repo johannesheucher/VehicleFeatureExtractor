@@ -29,8 +29,8 @@ public class FeatureExtractorTestApp {
 	
 	public FeatureExtractorTestApp() {
 		// load two similar images (maybe already a vehicle RoI)
-		ImageData dataImage = new ImageData(new File("D:/workspaces/VehicleData/featuretest/0_data_corsa.png"));
-		ImageData testImage = new ImageData(new File("D:/workspaces/VehicleData/featuretest/0_test_corsa.png"));
+		ImageData dataImage = new ImageData(new File("D:/workspaces/Temp Vehicle Data/Mini_One R50_00000005_000001_.jpg"));
+		ImageData testImage = new ImageData(new File("D:/workspaces/Temp Vehicle Data/Mini_One R50_00000005_000001_.jpg"));
 		
 		ImageIcon dataIcon = new ImageIcon(dataImage.getImage());
 		ImageIcon testIcon = new ImageIcon(testImage.getImage());

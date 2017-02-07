@@ -22,7 +22,7 @@ import dataset.ImageData;
 import processing.FeatureExtractor;
 
 public class DictionaryTestApp {
-	private static final int DICTIONARY_SIZE = 200;
+	private static final int DICTIONARY_SIZE = 190;
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String ARFF_FILENAME = "_vehicles.arff";
@@ -86,9 +86,7 @@ public class DictionaryTestApp {
 		Set<String> makemodels = new HashSet<>();
 		for (BoFHistogram histogram : histograms) {
 			String makemodel = histogram.getSource().getMakeModel();
-			//if (makemodel.contains("porsche") || makemodel.contains("golf") || makemodel.contains("corsa")) {
-				makemodels.add(makemodel);
-			//}
+			makemodels.add(makemodel);
 		}
 		StringBuilder makemodelBuilder = new StringBuilder();
 		Iterator<String> makemodelIterator = makemodels.iterator();
