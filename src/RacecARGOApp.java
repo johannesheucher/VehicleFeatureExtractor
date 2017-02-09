@@ -20,6 +20,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import dataset.ImageData;
+import util.NetworkUtil;
 
 public class RacecARGOApp {
 	
@@ -32,7 +33,7 @@ public class RacecARGOApp {
 	public RacecARGOApp() {
 		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
-		frame.getContentPane().setPreferredSize(new Dimension(1800, 800));
+		frame.getContentPane().setPreferredSize(new Dimension(1800, 700));
 		
 		// side panel
 		JPanel sidePanel = new JPanel();
@@ -74,28 +75,37 @@ public class RacecARGOApp {
 					break;
 				}
 				
-				byte messageType = inData.readByte();
+				int messageType = inData.readUnsignedByte();
 				System.out.printf("Got message of type: %d\n", messageType);
 				switch (messageType) {
 				case 1:
 					// VMMR Request
-//					byte[] bytes = new byte[12];
-//					int rb = inData.read(bytes);
-					
-					int numRows = 92;//inData.readInt();
-					int numCols = 200;//inData.readInt();
+					int numRows = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
+					int numCols = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
 					int numExpectedBytes = numRows * numCols;
 					
 					byte[] data = new byte[numExpectedBytes];
-					int numReadBytes = inData.read(data);
+					int numReadBytes = 0;
+					do {
+						numReadBytes += inData.read(data, numReadBytes, numExpectedBytes - numReadBytes);
+					} while (numReadBytes < numExpectedBytes || numReadBytes == 0);
+					
 					if (numReadBytes != numExpectedBytes) {
-						System.out.printf("Expected %d bytes, read %d\n", numExpectedBytes, numReadBytes);
+						System.out.printf(">>> WARNING: EXPECTED %d BYTES, READ %d\n", numExpectedBytes, numReadBytes);
+						// TODO: Skip all bytes left in the stream to prevent reading them next time
+					} else {
+					// clear line break at the end of the stream
+						inData.skip(1);
 					}
+					
 				    Mat mat = new Mat(numRows, numCols, CvType.CV_8UC1);
 				    mat.put(0, 0, data);
 				    updateImage(mat);
 					break;
+				default:
+					System.out.printf(">>> WARNING: UNKNOWN MESSAGE TYPE %d\n", messageType);
 				}
+				
 				
 //				int mid5 = in.read();
 //				
