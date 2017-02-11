@@ -1,14 +1,11 @@
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opencv.core.Core;
 
 import dataset.Dataset;
-import dataset.ImageData;
 
 public class VehicleCounterApp {
 	private static final String PATH = "D:/workspaces/VehicleData/selection/";

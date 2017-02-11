@@ -30,7 +30,7 @@ import dataset.NumberPlateMetaFile;
 
 
 public class NumberPlatePlacerApp {
-	private static final String PATH = "D:/workspaces/VehicleData/selection/";
+	private static final String PATH = "D:/workspaces/VehicleData/raw/";
 	
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final double IMAGE_SCALE = 0.3;

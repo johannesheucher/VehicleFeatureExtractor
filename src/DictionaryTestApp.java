@@ -22,7 +22,7 @@ import dataset.ImageData;
 import processing.FeatureExtractor;
 
 public class DictionaryTestApp {
-	private static final int DICTIONARY_SIZE = 190;
+	private static final int DICTIONARY_SIZE = 300;
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String ARFF_FILENAME = "_vehicles.arff";
