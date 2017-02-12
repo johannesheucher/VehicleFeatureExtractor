@@ -1,6 +1,7 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,6 +19,7 @@ import javax.swing.JPanel;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 
 import dataset.ImageData;
 import util.NetworkUtil;
@@ -43,7 +45,7 @@ public class RacecARGOApp {
 		
 		sizeToggle = 1;
 		
-		imageData = new ImageData(new File("D:/workspaces/Temp Vehicle Data/Mini_One R50_00000005_000001_.jpg"));
+		imageData = new ImageData(new Mat(100, 100, CvType.CV_8UC1, new Scalar(128)));
 		imageIcon = new ImageIcon(imageData.getImage());
 		JLabel imageLabel = new JLabel(imageIcon);
 		
@@ -58,13 +60,15 @@ public class RacecARGOApp {
 			System.out.println("waiting for client ...");
 			Socket client = server.accept();
 			System.out.print("Client has connected!\n");
-			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+			DataOutputStream out = new DataOutputStream(client.getOutputStream());
 			InputStream inStream = client.getInputStream();
-			InputStreamReader in = new InputStreamReader(inStream);
 			DataInputStream inData = new DataInputStream(inStream);
-			while (!in.ready()) {
-				System.out.println("not ready");
-			}
+			
+			// TODO remove?
+//			InputStreamReader in = new InputStreamReader(inStream);
+//			while (!in.ready()) {
+//				System.out.println("not ready");
+//			}
 			
 			long startTime = new Date().getTime();
 			while (true) {
@@ -101,6 +105,13 @@ public class RacecARGOApp {
 				    Mat mat = new Mat(numRows, numCols, CvType.CV_8UC1);
 				    mat.put(0, 0, data);
 				    updateImage(mat);
+				    
+					// send response
+				    String response = Integer.toString(messageType) + "0VW_Golf IV";
+				    int numBytes = response.length();
+				    out.writeByte(numBytes);		// TODO now limited to 255 bytes response length
+					out.writeBytes(response);
+				    
 					break;
 				default:
 					System.out.printf(">>> WARNING: UNKNOWN MESSAGE TYPE %d\n", messageType);
@@ -150,7 +161,7 @@ public class RacecARGOApp {
 			//System.out.print("Sending string: '" + data + "'\n");
 			//out.print(data);
 			out.close();
-			in.close();
+			inData.close();
 			client.close();
 			server.close();
 		}
