@@ -108,8 +108,9 @@ public class RacecARGOApp {
 				    
 					// send response
 				    String response = Integer.toString(messageType) + "0VW_Golf IV";
-				    int numBytes = response.length();
-				    out.writeByte(numBytes);		// TODO now limited to 255 bytes response length
+				    
+				    byte numBytes = (byte)response.length();
+				    out.writeShort(numBytes);
 					out.writeBytes(response);
 				    
 					break;
