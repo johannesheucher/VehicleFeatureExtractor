@@ -26,6 +26,7 @@ public class DictionaryTestApp {
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
 	private static final String ARFF_FILENAME = "_vehicles.arff";
+	private static final String DICTIONARY_FILENAME = "_dictionary.bytes";
 	
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
@@ -40,6 +41,7 @@ public class DictionaryTestApp {
 		}
 	    Dictionary dictionary = new Dictionary(trainingDescriptorsList, DICTIONARY_SIZE);
 	    
+	    dictionary.save(OUTPUT_PATH + DICTIONARY_FILENAME);
 	    
 	    // build histograms
 	    List<BoFHistogram> histograms = new ArrayList<>();
@@ -51,30 +53,7 @@ public class DictionaryTestApp {
 		    }
 	    	System.out.println("sum = " + sum);
 	    }
-	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
-	    
-//	    // build confusion matrix
-//	    int numImages = testSet.getImageList().size();
-//	    double[][] confusionMatrix = new double[numImages][numImages];
-//	    for (int i = 0; i < numImages; i++) {
-//	    	for (int j = 0; j < numImages; j++) {
-//	    		confusionMatrix[i][j] = ssd(histograms.get(i), histograms.get(j));
-//	    	}
-//	    }
-//	    BufferedWriter writer = new BufferedWriter(new FileWriter("confusion.csv"));
-//	    StringBuilder builder = new StringBuilder();
-//	    
-//	    for (int i = 0; i < confusionMatrix.length; i++) {
-//	    	for (int j = 0; j < confusionMatrix.length; j++) {
-//	    		if (j == 0) {
-//	    			builder.append(testSet.getImageList().get(i).getName() + ",");
-//	    		}
-//	    		builder.append(String.valueOf(confusionMatrix[i][j]) + ",");
-//	    	}
-//	    	builder.append(System.lineSeparator());
-//	    }
-//	    writer.write(builder.toString());
-//		writer.close();
+//	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
 	}
 	
 	

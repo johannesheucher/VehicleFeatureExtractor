@@ -1,5 +1,10 @@
 package dataset;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -8,6 +13,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.TermCriteria;
 
 import processing.bow.BOWKMeansTrainer;
+import util.NetworkUtil;
 
 public class Dictionary {
 	private int size;
@@ -27,6 +33,11 @@ public class Dictionary {
 	}
 	
 	
+	public Dictionary(String filename) {
+		load(filename);
+	}
+	
+	
 	public Mat getCodewords() {
 		return codewords;
 	}
@@ -37,7 +48,51 @@ public class Dictionary {
 	}
 	
 	
+	public void load(String filename) {
+		try {
+			File file = new File(filename);
+			byte[] data = new byte[(int)file.length()];
+			FileInputStream input = new FileInputStream(filename);
+			input.read(data);
+			input.close();
+			
+			byte[] rowsBytes = Arrays.copyOfRange(data, 0, 3);
+			byte[] colsBytes = Arrays.copyOfRange(data, 4, 7);
+			byte[] typeBytes = Arrays.copyOfRange(data, 8, 11);
+			int rows = NetworkUtil.bytesToInt(rowsBytes);
+			int cols = NetworkUtil.bytesToInt(colsBytes);
+			int type = NetworkUtil.bytesToInt(typeBytes);
+			
+			codewords = new Mat(rows, cols, type);
+			codewords.put(0, 0, data);
+			size = rows;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public void save(String filename) {
-		//codewords.dataAddr()
+		try {
+			int length = (int)(getCodewords().total() * getCodewords().elemSize());
+			byte matData[] = new byte[length];
+			getCodewords().get(0, 0, matData);
+			
+			byte[] rowsBytes = NetworkUtil.intToBytes(getCodewords().rows());
+			byte[] colsBytes = NetworkUtil.intToBytes(getCodewords().cols());
+			byte[] typeBytes = NetworkUtil.intToBytes(getCodewords().type());
+			
+			byte[] buffer = new byte[matData.length + 12];
+			System.arraycopy(rowsBytes, 0, buffer, 0, 4);
+			System.arraycopy(colsBytes, 0, buffer, 4, 4);
+			System.arraycopy(typeBytes, 0, buffer, 8, 4);
+			System.arraycopy(matData,   0, buffer, 12, matData.length);
+			
+			FileOutputStream output = new FileOutputStream(filename);
+			output.write(buffer);
+			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

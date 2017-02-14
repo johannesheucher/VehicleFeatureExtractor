@@ -1,5 +1,7 @@
 package util;
 
+import java.nio.ByteBuffer;
+
 public class NetworkUtil {
 	
 	/**
@@ -19,5 +21,18 @@ public class NetworkUtil {
 	 */
 	public static int swapShortEndian(int s) {
 	    return ((s&0xff)<<8 | (s&0xff00)>>8) & 0x0000ffff;
+	}
+	
+	
+	public static int bytesToInt(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		return buffer.getInt();
+	}
+	
+	
+	public static byte[] intToBytes(int value) {
+		ByteBuffer buffer = ByteBuffer.allocate(4);
+		buffer.putInt(value);
+		return buffer.array();
 	}
 }
