@@ -11,6 +11,8 @@ import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.DescriptorMatcher;
 
 import processing.FeatureExtractor;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 
 /**
  * Global descriptor for a make-model. Bag of Features (BoF).
@@ -66,5 +68,15 @@ public class BoFHistogram {
 			}
 		}
 		return builder.toString();
+	}
+	
+	
+	public Instance toInstance() {
+		Instance instance = new DenseInstance(getValues().size() + 1);	// + class attribute
+		for (int i = 0; i < getValues().size(); i++) {
+			double value = getValues().get(i);
+			instance.setValue(i + 1, value);		// class attribute is the first one
+		}
+		return instance;
 	}
 }

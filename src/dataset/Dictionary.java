@@ -56,15 +56,15 @@ public class Dictionary {
 			input.read(data);
 			input.close();
 			
-			byte[] rowsBytes = Arrays.copyOfRange(data, 0, 3);
-			byte[] colsBytes = Arrays.copyOfRange(data, 4, 7);
-			byte[] typeBytes = Arrays.copyOfRange(data, 8, 11);
+			byte[] rowsBytes = Arrays.copyOfRange(data, 0, 4);
+			byte[] colsBytes = Arrays.copyOfRange(data, 4, 8);
+			byte[] typeBytes = Arrays.copyOfRange(data, 8, 12);
 			int rows = NetworkUtil.bytesToInt(rowsBytes);
 			int cols = NetworkUtil.bytesToInt(colsBytes);
 			int type = NetworkUtil.bytesToInt(typeBytes);
 			
 			codewords = new Mat(rows, cols, type);
-			codewords.put(0, 0, data);
+			codewords.put(0, 0, Arrays.copyOfRange(data, 12, data.length));
 			size = rows;
 		} catch (IOException e) {
 			e.printStackTrace();

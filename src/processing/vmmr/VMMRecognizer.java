@@ -1,5 +1,6 @@
 package processing.vmmr;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import weka.classifiers.Classifier;
@@ -55,9 +56,21 @@ public class VMMRecognizer {
 	
 	
 	public String classify(Instance instance) {
+		if (instance.dataset() == null) {
+//			System.out.println("Instance has no dataset");
+			instance.setDataset(instances);
+		}
+//		instance.setClassMissing();
+		
 		double[] distribution = null;
 		try {
 			distribution = classifier.distributionForInstance(instance);
+			double sum = 0;
+			for (double value : distribution) {
+				sum += value;
+			}
+			double classificationIndex = classifier.classifyInstance(instance);
+			System.out.printf("\ndistribution: %s\tsum: %.2f\tclassIndex: %.2f\n", Arrays.toString(distribution), sum, classificationIndex);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

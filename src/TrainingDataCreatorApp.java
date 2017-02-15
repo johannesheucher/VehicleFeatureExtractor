@@ -14,13 +14,14 @@ import dataset.NumberPlateMetaFile;
 import processing.RoIExtractor;
 
 public class TrainingDataCreatorApp {
-	private static final String INPUT_PATH = "D:/workspaces/VehicleData/raw/";
-	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training2/";
+	private static final String INPUT_PATH = "D:/workspaces/Temp Vehicle Data/";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/testing/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final int ROI_WIDTH = 400;
 	
 	private static final int MIN_NUM_VEHICLES = 5;
 	private static final List<String> ALLOWED_VEHICLE_NAMES = Arrays.asList("vw_kaefer", "vw_polo_9n3", "mazda_mx-5_nd", "opel_mokka", "porsche_911", "vw_golf_iv", "opel_corsa_d");
+	private static final boolean USE_CONSTRAINTS = false;
 	
 	private NumberPlateMetaFile numberPlateMeta;
 	
@@ -37,7 +38,7 @@ public class TrainingDataCreatorApp {
 		
 		for (ImageData image : dataset.getImageList()) {
 			// there must be at least MIN_NUM_VEHICLES vehicles of this make-model to be proper for training data
-			if (dataset.getVehicleCounts().get(image.getMakeModel()) >= MIN_NUM_VEHICLES && ALLOWED_VEHICLE_NAMES.contains(image.getMakeModel())) {
+			if (!USE_CONSTRAINTS || (dataset.getVehicleCounts().get(image.getMakeModel()) >= MIN_NUM_VEHICLES && ALLOWED_VEHICLE_NAMES.contains(image.getMakeModel()))) {
 				image.toGray();
 				Rect rect = numberPlateMeta.getRect(image.getVehicleKey());
 				if (rect != null) {

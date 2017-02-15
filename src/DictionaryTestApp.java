@@ -53,7 +53,7 @@ public class DictionaryTestApp {
 		    }
 	    	System.out.println("sum = " + sum);
 	    }
-//	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
+	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
 	}
 	
 	
