@@ -1,7 +1,10 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,6 +21,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
+import dataset.Dataset;
 import dataset.ImageData;
 import util.NetworkUtil;
 
@@ -27,6 +31,7 @@ public class RacecARGOApp {
 	private ImageData imageData;
 	private ImageIcon imageIcon;
 	private int sizeToggle;
+	private boolean running = true;
 	
 	
 	public RacecARGOApp() {
@@ -50,6 +55,12 @@ public class RacecARGOApp {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				running = false;
+			}
+		});
 		
 		// build server socket
 		try {
@@ -61,21 +72,10 @@ public class RacecARGOApp {
 			InputStream inStream = client.getInputStream();
 			DataInputStream inData = new DataInputStream(inStream);
 			
-			// TODO remove?
-//			InputStreamReader in = new InputStreamReader(inStream);
-//			while (!in.ready()) {
-//				System.out.println("not ready");
-//			}
+			// load classifier
+			VMMRTestVehicleApp vmmrApp = new VMMRTestVehicleApp();
 			
-			long startTime = new Date().getTime();
-			while (true) {
-				// break after 60 seconds
-				long duration = new Date().getTime() - startTime;
-				System.out.printf("duration: %d\n", duration / 1000);
-				if (duration > 1000 * 60) {
-					break;
-				}
-				
+			while (running) {
 				int messageType = inData.readUnsignedByte();
 				System.out.printf("Got message of type: %d\n", messageType);
 				switch (messageType) {
@@ -103,11 +103,16 @@ public class RacecARGOApp {
 				    mat.put(0, 0, data);
 				    updateImage(mat);
 				    
+				    // classify
+					String label = vmmrApp.classifyImage(new ImageData(mat));
+					System.out.printf("classified as:\t\t%s\n", label);
+				    
+				    
 					// send response
-				    String response = Integer.toString(messageType) + "0VW_Golf IV";
+				    String response = Integer.toString(messageType) + "0" + label;
 				    
 				    byte numBytes = (byte)response.length();
-				    out.writeShort(numBytes);
+				    out.writeShort(numBytes + 2);		// + 2 bytes (short) for message length
 					out.writeBytes(response);
 				    
 					break;
