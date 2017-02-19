@@ -8,7 +8,7 @@ import org.opencv.core.Core;
 import dataset.Dataset;
 
 public class VehicleCounterApp {
-	private static final String PATH = "D:/workspaces/VehicleData/selection/";
+	private static final String PATH = "D:/workspaces/VehicleData/raw/";
 	
 	
 	
@@ -20,7 +20,7 @@ public class VehicleCounterApp {
 		int i = 0;
 		while (entryIterator.hasNext()) {
 			Entry<String, Integer> entry = entryIterator.next();
-			output[i] = entry.getKey() + ":    " + entry.getValue();
+			output[i] = entry.getKey() + "," + entry.getValue();
 			i++;
 		}
 		Arrays.sort(output);

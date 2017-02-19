@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import dataset.NumberPlateMetaFile;
 import processing.RoIExtractor;
 
 public class TrainingDataCreatorApp {
-	private static final String INPUT_PATH = "D:/workspaces/Temp Vehicle Data/";
+	private static final String INPUT_PATH = "D:/workspaces/VehicleData/raw/";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/testing/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final int ROI_WIDTH = 400;
@@ -25,13 +26,16 @@ public class TrainingDataCreatorApp {
 	
 	private NumberPlateMetaFile numberPlateMeta;
 	
+	private List<ImageData> trainingData;
+	private Dataset dataset;
 	
-	public TrainingDataCreatorApp() {
-		Dataset dataset = new Dataset(new File(INPUT_PATH), false);
+	public TrainingDataCreatorApp(String inputPath) {
+		dataset = new Dataset(new File(inputPath), false);
+		trainingData = new ArrayList<>();
 		
 		numberPlateMeta = new NumberPlateMetaFile();
 		try {
-			numberPlateMeta.read(INPUT_PATH + NUMBER_PLATE_FILENAME);
+			numberPlateMeta.read(inputPath + NUMBER_PLATE_FILENAME);
 		} catch (IOException e1) {
 			System.out.println("No number plate meta file found.");
 		}
@@ -46,8 +50,10 @@ public class TrainingDataCreatorApp {
 					Imgproc.equalizeHist(roi, roi);
 					ImageData result = new ImageData(roi);
 					result.resize(ROI_WIDTH);
-					result.save(new File(OUTPUT_PATH + image.getName()));
-					System.out.println("exported vehicle " + image.getName());
+					result.setName(image.getName());
+					trainingData.add(result);
+					
+					System.out.println("created training data for vehicle " + image.getName());
 				} else {
 					System.out.println("=== WARNING: No number plate found for vehicle " + image.getName() + " ===");
 				}
@@ -57,8 +63,27 @@ public class TrainingDataCreatorApp {
 	}
 	
 	
+	public List<ImageData> getTrainingData() {
+		return trainingData;
+	}
+	
+	
+	public Dataset getDataset() {
+		return dataset;
+	}
+	
+	
+	public void saveTrainingData(String outputPath) {
+		for (ImageData image : trainingData) {
+			image.save(new File(outputPath + image.getName()));
+			System.out.println("exported vehicle " + image.getName());
+		}
+	}
+	
+	
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		new TrainingDataCreatorApp();
+		TrainingDataCreatorApp app = new TrainingDataCreatorApp(INPUT_PATH);
+		app.saveTrainingData(OUTPUT_PATH);
 	}
 }

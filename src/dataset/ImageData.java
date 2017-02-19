@@ -49,6 +49,11 @@ public class ImageData {
 	}
 	
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
 	public String getMake() {
 //		Pattern p = Pattern.compile("([^_]+)\\w*");
 //		String name = getName().toLowerCase();

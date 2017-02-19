@@ -20,9 +20,9 @@ public class VMMRTestVehicleApp {
 	VMMRecognizer recognizer;
 	private Dictionary dictionary;
 	
-	public VMMRTestVehicleApp() throws Exception {
+	public VMMRTestVehicleApp(String filename) throws Exception {
 		// train classifier
-		DataSource source = new DataSource(ARFF_FILENAME);
+		DataSource source = new DataSource(filename);
 		Instances instances = source.getDataSet(0);
 		
 		recognizer = new VMMRecognizer();
@@ -34,6 +34,11 @@ public class VMMRTestVehicleApp {
 		
 		// load dictionary
 		dictionary = new Dictionary(DICTIONARY_FILENAME);
+	}
+	
+	
+	public VMMRTestVehicleApp() throws Exception {
+		this(ARFF_FILENAME);
 	}
 	
 	
