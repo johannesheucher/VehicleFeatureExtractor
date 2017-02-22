@@ -34,7 +34,7 @@ public class Dataset {
      * @param normalize Turns images to gray and resizes them to the standard width specified in Const
      */
 	public Dataset(File imagePath, boolean normalize) {
-		imageList = new ArrayList<>();
+		imageList = new ArrayList<>(500);
 		vehicleCounts = new HashMap<>();
 		addData(imagePath, normalize);
 	}
@@ -74,6 +74,7 @@ public class Dataset {
     			}
     			count++;
     			vehicleCounts.put(makemodel, count);
+    			System.out.printf("added %s\n", image.getName());
             }
 		}
 	}

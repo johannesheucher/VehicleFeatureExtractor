@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.TermCriteria;
 
+import processing.FeatureExtractor;
 import processing.bow.BOWKMeansTrainer;
 import util.NetworkUtil;
 
@@ -30,6 +33,17 @@ public class Dictionary {
 		}
 		Mat codewords32f = trainer.cluster();
 		codewords32f.convertTo(codewords, CvType.CV_8UC1);
+	}
+	
+	
+	public static Dictionary fromImages(List<ImageData> images, int size) {
+		List<Mat> descriptorsList = new ArrayList<>();
+		for (ImageData image : images) {
+			Mat descriptors = new Mat();
+			FeatureExtractor.extract(image.getMat(), new MatOfKeyPoint(), descriptors);
+			descriptorsList.add(descriptors);
+		}
+	    return new Dictionary(descriptorsList, size);
 	}
 	
 	

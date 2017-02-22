@@ -22,38 +22,29 @@ import dataset.ImageData;
 import processing.FeatureExtractor;
 
 public class DictionaryTestApp {
-	private static final int DICTIONARY_SIZE = 300;
+	public static final int DICTIONARY_SIZE = 300;
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
 	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
-	private static final String ARFF_FILENAME = "_vehicles.arff";
-	private static final String DICTIONARY_FILENAME = "_dictionary.bytes";
+	private static final String ARFF_FILENAME = "_%svehicles.arff";
+	private static final String DICTIONARY_FILENAME = "_%sdictionary.bytes";
 	
-	public static void main(String[] args) throws IOException {
-		// load training set and build dictionary
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+	public DictionaryTestApp() throws IOException {
 		Dataset trainingSet = new Dataset(new File(INPUT_PATH), false);
 		
-		List<Mat> trainingDescriptorsList = new ArrayList<>();
-		for (ImageData image : trainingSet.getImageList()) {
-			Mat descriptors = new Mat();
-			FeatureExtractor.extract(image.getMat(), new MatOfKeyPoint(), descriptors);
-			trainingDescriptorsList.add(descriptors);
-		}
-	    Dictionary dictionary = new Dictionary(trainingDescriptorsList, DICTIONARY_SIZE);
-	    
-	    dictionary.save(OUTPUT_PATH + DICTIONARY_FILENAME);
+	    DictionaryTestApp.buildDictionaryAndARFF(trainingSet.getImageList(), DICTIONARY_SIZE, OUTPUT_PATH, "");
+	}
+	
+	
+	public static void buildDictionaryAndARFF(List<ImageData> images, int dictionarySize, String outputPath, String dataId) throws IOException {
+		Dictionary dictionary = Dictionary.fromImages(images, dictionarySize);
+	    dictionary.save(outputPath + String.format(DICTIONARY_FILENAME, dataId));
 	    
 	    // build histograms
 	    List<BoFHistogram> histograms = new ArrayList<>();
-	    for (ImageData image : trainingSet.getImageList()) {
+	    for (ImageData image : images) {
 	    	histograms.add(new BoFHistogram(image, dictionary));
-	    	double sum = 0;
-	    	for (Double bin : histograms.get(histograms.size() - 1).getValues()) {
-		    	sum += bin;
-		    }
-	    	System.out.println("sum = " + sum);
 	    }
-	    toArff(histograms, new File(OUTPUT_PATH + ARFF_FILENAME));
+	    DictionaryTestApp.toArff(histograms, new File(outputPath + String.format(ARFF_FILENAME, dataId)));
 	}
 	
 	
@@ -145,5 +136,12 @@ public class DictionaryTestApp {
 		
 		writer.write(builder.toString());
 		writer.close();
+	}
+	
+	
+	public static void main(String[] args) throws IOException {
+		// load training set and build dictionary
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		new DictionaryTestApp();
 	}
 }

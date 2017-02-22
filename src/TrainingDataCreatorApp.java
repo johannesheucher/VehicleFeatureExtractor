@@ -31,7 +31,7 @@ public class TrainingDataCreatorApp {
 	
 	public TrainingDataCreatorApp(String inputPath) {
 		dataset = new Dataset(new File(inputPath), false);
-		trainingData = new ArrayList<>();
+		trainingData = new ArrayList<>(dataset.getImageList().size());
 		
 		numberPlateMeta = new NumberPlateMetaFile();
 		try {
