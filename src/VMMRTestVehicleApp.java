@@ -13,8 +13,8 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class VMMRTestVehicleApp {
-	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training/_vehicles_30.arff";
-	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training/_dictionary_30.bytes";
+	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training/_39vehicles.arff";
+	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training/_39dictionary.bytes";
 	private static String TESTING_PATH			= "D:/workspaces/VehicleData/testing/";
 	
 	VMMRecognizer recognizer;
@@ -30,6 +30,7 @@ public class VMMRTestVehicleApp {
 		double correct = recognizer.train(ClassifierType.SVM, instances, weka.core.Utils.splitOptions(options));		// TODO: Fill with best options
 		
 		String s = String.format("classification performance: %.1f%% correct\n", correct/instances.size() * 100);
+		
 		System.out.print(s);
 		
 		// load dictionary
@@ -43,6 +44,7 @@ public class VMMRTestVehicleApp {
 	
 	
 	public String classifyImage(ImageData image) {
+		image.toGray();
 		BoFHistogram globalDescriptor = new BoFHistogram(image,	dictionary);
 		Instance instance = globalDescriptor.toInstance();
 		return recognizer.classify(instance);
@@ -52,7 +54,11 @@ public class VMMRTestVehicleApp {
 	public static void main(String[] args) throws Exception {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		VMMRTestVehicleApp app = new VMMRTestVehicleApp();
+		final String id = "42";
+		
+		//VMMRTestVehicleApp app = new VMMRTestVehicleApp();
+		VMMRTestVehicleApp app = new VMMRTestVehicleApp("D:/workspaces/VehicleData/ARFF_test30/_00" + id + "vehicles.arff", "D:/workspaces/VehicleData/ARFF_test30/_00" + id + "dictionary.bytes");
+		//VMMRTestVehicleApp app = new VMMRTestVehicleApp("D:/workspaces/VehicleData/ARFF_test30/_vehicles_30.arff", "D:/workspaces/VehicleData/ARFF_test30/_0030dictionary.bytes");
 		
 		// load test instance and classify
 		Dataset dataset = new Dataset(new File(TESTING_PATH), false);

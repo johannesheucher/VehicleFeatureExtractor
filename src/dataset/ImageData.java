@@ -44,6 +44,9 @@ public class ImageData {
 	}
 	
 	
+	/**
+	 * @return Filename without path
+	 */
 	public String getName() {
 		return name;
 	}
@@ -77,6 +80,9 @@ public class ImageData {
 	}
 	
 	
+	/**
+	 * @return Key unique for vehicle instance (name without file suffix)
+	 */
 	public String getVehicleKey() {
 		return getName().substring(0, getName().lastIndexOf("."));
 	}

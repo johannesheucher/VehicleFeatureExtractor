@@ -28,10 +28,10 @@ public class DictionaryTestApp {
 	private static final String ARFF_FILENAME = "_%svehicles.arff";
 	private static final String DICTIONARY_FILENAME = "_%sdictionary.bytes";
 	
-	public DictionaryTestApp() throws IOException {
+	public DictionaryTestApp(String dataId) throws IOException {
 		Dataset trainingSet = new Dataset(new File(INPUT_PATH), false);
 		
-	    DictionaryTestApp.buildDictionaryAndARFF(trainingSet.getImageList(), DICTIONARY_SIZE, OUTPUT_PATH, "");
+	    DictionaryTestApp.buildDictionaryAndARFF(trainingSet.getImageList(), DICTIONARY_SIZE, OUTPUT_PATH, dataId);
 	}
 	
 	
@@ -142,6 +142,6 @@ public class DictionaryTestApp {
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		new DictionaryTestApp();
+		new DictionaryTestApp("39");
 	}
 }
