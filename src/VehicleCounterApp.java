@@ -8,7 +8,7 @@ import org.opencv.core.Core;
 import dataset.Dataset;
 
 public class VehicleCounterApp {
-	private static final String PATH = "D:/workspaces/VehicleData/raw/";
+	private static final String PATH = "D:/workspaces/VehicleData/test/";
 	
 	
 	

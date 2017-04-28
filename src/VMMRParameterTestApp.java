@@ -10,7 +10,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class VMMRParameterTestApp {
 	//private static String ARFF_FILENAME = "D:/workspaces/VehicleData/training/_vehicles_30.arff";
-	private static String ARFF_FILENAME = "D:/workspaces/VehicleData/ARFF_original_seven/_0042vehicles.arff";
+	private static String ARFF_FILENAME = "D:/workspaces/VehicleData/ARFF_original_seven/_0043vehicles.arff";
 	private static String OUTPUT_FILENAME = "D:/workspaces/VehicleData/training/_parametersEval.txt";
 	
 	public static void main(String[] args) throws Exception {

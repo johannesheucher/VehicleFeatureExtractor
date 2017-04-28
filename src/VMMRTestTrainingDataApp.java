@@ -18,7 +18,8 @@ import dataset.ImageData;
 
 public class VMMRTestTrainingDataApp {
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/raw/";
-	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/ARFF_original_seven/";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/ARFF/";
+//	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/ARFF_original_seven/";
 	private static final int SUBSET_SIZE = 13;
 	private static final int MIN_VEHICLES_PER_CLASS = 5;	// DEBUG: 8
 	
@@ -30,75 +31,87 @@ public class VMMRTestTrainingDataApp {
 	
 	public VMMRTestTrainingDataApp() throws Exception {
 		TrainingDataCreatorApp trainingDataCreator = new TrainingDataCreatorApp(INPUT_PATH);
-		
+		List<ImageData> subsetImages;
 		// DEBUG
-		//Dataset trainingSet = new Dataset(new File("D:/workspaces/VehicleData/training/"), false);
-		List<ImageData> subsetImages = new ArrayList<>();
-		Set<String> allowed = new HashSet<>(java.util.Arrays.asList("vw_kaefer","vw_polo_9n3","mazda_mx-5_nd","opel_mokka","porsche_911","vw_golf_iv","opel_corsa_d"));
-		for (ImageData image : trainingDataCreator.getTrainingData()) {
-			if (allowed.contains(image.getMakeModel())) {
-				
-				// save as 8UC1, import as 8UC3 gives best results
-//				Imgproc.cvtColor(image.getMat(), image.getMat(), Imgproc.COLOR_GRAY2RGB);
-				
-				// whyever, this is necessary for better classification performance -> save and reload image
-				String name = image.getName();
-				File filename = new File(OUTPUT_PATH + "training_images/" + "tmp" + name.substring(name.indexOf(".")));
-				image.save(filename);
-				image = new ImageData(filename);
-				image.setName(name);
-				Imgproc.cvtColor(image.getMat(), image.getMat(), Imgproc.COLOR_BGR2GRAY);
-				
-				subsetImages.add(image);
-				System.out.println("exported vehicle " + image.getName());
-			}
-		}
-//		if (true) {
-//			return;
+		//List<String> allowedList = java.util.Arrays.asList("mazda_mx-5_nd","opel_corsa_d","opel_mokka","porsche_911","vw_golf_iv","vw_kaefer","vw_polo_9n3");
+		List<String> allowedList = java.util.Arrays.asList("mazda_mx-5_nd","opel_corsa_d","opel_mokka","porsche_911","vw_golf_iv","vw_kaefer","citroen_c4_cactus","vw_polo_9n3","tesla_model_s");
+		Set<String> allowed = new HashSet<>(allowedList);
+		// DEBUG END
+		
+		subsetImages = new ArrayList<>();
+//		for (ImageData image : trainingDataCreator.getTrainingData()) {
+//			if (allowed.contains(image.getMakeModel())) {
+//				
+//				// save as 8UC1, import as 8UC3 (convert or not to 8UC1) gives best results
+////				Imgproc.cvtColor(image.getMat(), image.getMat(), Imgproc.COLOR_GRAY2RGB);
+//				
+//				// whyever, this is necessary for better classification performance -> save and reload image
+//				String name = image.getName();
+//				File filename = new File(OUTPUT_PATH + "tmp_images/" + "tmp" + name.substring(name.indexOf(".")));
+//				image.save(filename);
+//				image = new ImageData(filename);
+//				image.setName(name);
+//				Imgproc.cvtColor(image.getMat(), image.getMat(), Imgproc.COLOR_BGR2GRAY);
+//				
+//				subsetImages.add(image);
+//				System.out.println("exported vehicle " + image.getName());
+//			}
 //		}
 		
 //		Dataset trainingSet = new Dataset(new File(OUTPUT_PATH + "training_images1/"), false);
 //		subsetImages = trainingSet.getImageList();
 		
 		// divide by make-model
-//		trainingData = new HashMap<>();
-//		for (ImageData image : trainingDataCreator.getTrainingData()) {
-//		//for (ImageData image : trainingSet.getImageList()) {
-//			if (trainingDataCreator.getDataset().getVehicleCounts().get(image.getMakeModel()) >= MIN_VEHICLES_PER_CLASS) {
-//			//if (trainingSet.getVehicleCounts().get(image.getMakeModel()) >= MIN_VEHICLES_PER_CLASS) {
-//				String makeModel = image.getMakeModel();
-//				List<ImageData> vehicles;
-//				if (trainingData.containsKey(makeModel)) {
-//					vehicles = trainingData.get(makeModel);
-//				} else {
-//					vehicles = new ArrayList<>();
-//					trainingData.put(makeModel, vehicles);
-//				}
-//				vehicles.add(image);
-//			}
-//		}
+		trainingData = new HashMap<>();
+		for (ImageData image : trainingDataCreator.getTrainingData()) {
+		//for (ImageData image : trainingSet.getImageList()) {
+			if (trainingDataCreator.getDataset().getVehicleCounts().get(image.getMakeModel()) >= MIN_VEHICLES_PER_CLASS) {
+			//if (trainingSet.getVehicleCounts().get(image.getMakeModel()) >= MIN_VEHICLES_PER_CLASS) {
+				String makeModel = image.getMakeModel();
+				List<ImageData> vehicles;
+				if (trainingData.containsKey(makeModel)) {
+					vehicles = trainingData.get(makeModel);
+				} else {
+					vehicles = new ArrayList<>();
+					trainingData.put(makeModel, vehicles);
+				}
+				// whyever, this is necessary for better classification performance -> save and reload image
+				String name = image.getName();
+				File filename = new File(OUTPUT_PATH + "tmp_images/" + "tmp" + name.substring(name.indexOf(".")));
+				image.save(filename);
+				image = new ImageData(filename);
+				image.setName(name);
+				Imgproc.cvtColor(image.getMat(), image.getMat(), Imgproc.COLOR_BGR2GRAY);
+				vehicles.add(image);
+				
+				if (allowed.contains(image.getMakeModel())) {
+					subsetImages.add(image);
+				}
+			}
+		}
 		
 		// permute all combinations of SUBSET_SIZE make-models
-		// DEBUG: uncomment
 //		List<Set<String>> subsets = VMMRTestTrainingDataApp.getSubsetsWithLength(new ArrayList<>(trainingData.keySet()), SUBSET_SIZE);
 //		for (Set<String> subset : subsets) {
-//			System.out.println(subset.toString());
+//			System.out.println("--- " + subset.toString());
 //		}
 		
 		// create an ARFF file for each subset
 		int id = 0;
 		//for (Set<String> subset : subsets) {
 		// DEBUG
-		id = 42;
-		//Set<String> subset = new HashSet<>(java.util.Arrays.asList("vw_kaefer","vw_polo_9n3","mazda_mx-5_nd","opel_mokka","porsche_911","vw_golf_iv","opel_corsa_d"));
+		id = 1;
 		// DEBUG end
-			//List<ImageData> subsetImages = getImages(subset);
+			//subsetImages = getImagesFromList(allowedList);
 //			subsetImages = new ArrayList<>();
 //			for (ImageData image : trainingDataCreator.getTrainingData()) {
 //				if (subset.contains(image.getMakeModel())) {
 //					subsetImages.add(image);
 //				}
 //			}
+			for (ImageData image : subsetImages) {
+				System.out.println(image.getName());
+			}
 			
 			String dataId = String.format("%04d", id);
 			id++;
@@ -119,6 +132,16 @@ public class VMMRTestTrainingDataApp {
 	
 	
 	private List<ImageData> getImages(Set<String> vehicleNames) {
+		List<ImageData> resultList = new ArrayList<>();
+		for (String vehicleName : vehicleNames) {
+			List<ImageData> images = trainingData.get(vehicleName);
+			resultList.addAll(images);
+		}
+		return resultList;
+	}
+	
+	
+	private List<ImageData> getImagesFromList(List<String> vehicleNames) {
 		List<ImageData> resultList = new ArrayList<>();
 		for (String vehicleName : vehicleNames) {
 			List<ImageData> images = trainingData.get(vehicleName);

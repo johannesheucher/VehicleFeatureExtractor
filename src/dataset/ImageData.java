@@ -8,6 +8,7 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Rect;
@@ -134,7 +135,9 @@ public class ImageData {
 	
 	
 	public void toGray() {
-		Imgproc.cvtColor(getMat(), getMat(), Imgproc.COLOR_BGR2GRAY);
+		if (getMat().type() == CvType.CV_8UC3) {
+			Imgproc.cvtColor(getMat(), getMat(), Imgproc.COLOR_BGR2GRAY);
+		}
 		needsRefreshImage();
 	}
 	
