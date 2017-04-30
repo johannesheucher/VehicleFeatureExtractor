@@ -1,12 +1,10 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.WindowAdapter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -20,7 +18,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
 import dataset.ImageData;
-import util.NetworkUtil;
 
 public class RacecARGOApp {
 	
@@ -33,10 +30,9 @@ public class RacecARGOApp {
 	
 	ServerSocket server;
 	Socket client;
-	DataOutputStream out;
-	DataInputStream inData;
+	ArrayList<Thread> clientThreads = new ArrayList<>();
 	
-	public RacecARGOApp() {
+	public RacecARGOApp() throws InterruptedException {
 		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
 		frame.getContentPane().setPreferredSize(new Dimension(1800, 700));
@@ -65,97 +61,60 @@ public class RacecARGOApp {
 		});
 		
 		// build server socket
-		while (running) {
+//		while (running) {
 			try {
-				runServerSocket();
-			}
-			catch(Exception e) {
-				System.out.print("Whoops! It didn't work!\n");
+				// wait for client
+				server = new ServerSocket(1234);
+				runWaitingLoop();
+			} catch(Exception e) {
+				System.out.printf("Error while waiting\n");
 				e.printStackTrace();
 				System.out.println("restarting");
-			}
-			finally {
+			} finally {
 				try {
-					out.close();
-					inData.close();
-					client.close();
 					server.close();
+					
+					// close all client threads
+					for (Thread clientThread : clientThreads) {
+						clientThread.interrupt();
+						clientThread.join(100);
+					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//			try {
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
 	    System.out.println("end");
 	}
 	
 	
-	private void runServerSocket() throws Exception {
-		server = new ServerSocket(1234);
-		System.out.println("waiting for client ...");
-		client = server.accept();
-		System.out.print("Client has connected!\n");
-		out = new DataOutputStream(client.getOutputStream());
-		InputStream inStream = client.getInputStream();
-		inData = new DataInputStream(inStream);
-		
-		// load classifier
-		VMMRTestVehicleApp vmmrApp = new VMMRTestVehicleApp();
-		
+	private void runWaitingLoop() throws IOException {
 		while (running) {
-			int messageType = inData.readUnsignedByte();
-			System.out.printf("Got message of type: %d\n", messageType);
-			switch (messageType) {
-			case 1:
-				// VMMR Request
-				int numRows = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
-				int numCols = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
-				int numExpectedBytes = numRows * numCols;
-				
-				byte[] data = new byte[numExpectedBytes];
-				int numReadBytes = 0;
-				do {
-					numReadBytes += inData.read(data, numReadBytes, numExpectedBytes - numReadBytes);
-				} while (numReadBytes < numExpectedBytes || numReadBytes == 0);
-				
-				if (numReadBytes != numExpectedBytes) {
-					System.out.printf(">>> WARNING: EXPECTED %d BYTES, READ %d\n", numExpectedBytes, numReadBytes);
-					// TODO: Skip all bytes left in the stream to prevent reading them next time
+			System.out.println("waiting for client ...");
+			client = server.accept();
+			
+			// clean up stored threads
+			int threadIndex = 0;
+			while (threadIndex < clientThreads.size()) {
+				if (!clientThreads.get(threadIndex).isAlive()) {
+					clientThreads.remove(threadIndex);
 				} else {
-				// clear line break at the end of the stream
-					inData.skip(1);
+					threadIndex++;
 				}
-				
-			    Mat mat = new Mat(numRows, numCols, CvType.CV_8UC1);
-			    mat.put(0, 0, data);
-			    updateImage(mat);
-			    
-			    // classify
-				String label = vmmrApp.classifyImage(new ImageData(mat));
-				System.out.printf("classified as:\t\t%s\n", label);
-			    
-			    
-				// send response
-			    String response = Integer.toString(messageType) + "0" + label;
-			    
-			    byte numBytes = (byte)response.length();
-			    out.writeShort(numBytes + 2);		// + 2 bytes (short) for message length
-				out.writeBytes(response);
-			    
-				break;
-			default:
-				System.out.printf(">>> WARNING: UNKNOWN MESSAGE TYPE %d\n", messageType);
 			}
+			
+			System.out.printf("Client %d has connected!\n", clientThreads.size());
+			
+			// move client to separate thread
+			Thread clientThread = new Thread(new VMMRSocket(client));
+			clientThreads.add(clientThread);
+			clientThread.start();
 		}
-		
-		//System.out.print("Sending string: '" + data + "'\n");
-		//out.print(data);
 	}
 	
 	
@@ -172,6 +131,10 @@ public class RacecARGOApp {
 	
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		new RacecARGOApp();
+		try {
+			new RacecARGOApp();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }
