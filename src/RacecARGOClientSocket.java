@@ -10,7 +10,7 @@ import org.opencv.core.Mat;
 import dataset.ImageData;
 import util.NetworkUtil;
 
-public class VMMRSocket implements Runnable {
+public class RacecARGOClientSocket implements Runnable {
 
 	private Socket client;
 	private DataOutputStream out;
@@ -19,7 +19,7 @@ public class VMMRSocket implements Runnable {
 	private String clientName;
 	
 	
-	public VMMRSocket(Socket client) {
+	public RacecARGOClientSocket(Socket client) {
 		this.client = client;
 	}
 	
@@ -30,6 +30,10 @@ public class VMMRSocket implements Runnable {
 			out = new DataOutputStream(client.getOutputStream());
 			InputStream inStream = client.getInputStream();
 			inData = new DataInputStream(inStream);
+			
+			byte[] data;
+			int numExpectedBytes;
+			int numReadBytes;
 			
 			// load classifier
 			VMMRTestVehicleApp vmmrApp = new VMMRTestVehicleApp();
@@ -42,10 +46,10 @@ public class VMMRSocket implements Runnable {
 					// VMMR Request
 					int numRows = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
 					int numCols = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
-					int numExpectedBytes = numRows * numCols;
+					numExpectedBytes = numRows * numCols;
 					
-					byte[] data = new byte[numExpectedBytes];
-					int numReadBytes = 0;
+					data = new byte[numExpectedBytes];
+					numReadBytes = 0;
 					do {
 						numReadBytes += inData.read(data, numReadBytes, numExpectedBytes - numReadBytes);
 					} while (numReadBytes < numExpectedBytes || numReadBytes == 0);
@@ -67,12 +71,37 @@ public class VMMRSocket implements Runnable {
 					System.out.printf("classified as:\t\t%s\n", label);
 				    
 				    
-					// send response
+					// send response ("0" is "no error")
 				    String response = Integer.toString(messageType) + "0" + label;
 				    
 				    byte numBytes = (byte)response.length();
 				    out.writeShort(numBytes + 2);		// + 2 bytes (short) for message length
 					out.writeBytes(response);
+				    
+					break;
+				case 2:
+					// User name
+					numExpectedBytes = NetworkUtil.swapShortEndian(inData.readUnsignedShort());
+					
+					data = new byte[numExpectedBytes];
+					numReadBytes = 0;
+					do {
+						numReadBytes += inData.read(data, numReadBytes, numExpectedBytes - numReadBytes);
+					} while (numReadBytes < numExpectedBytes || numReadBytes == 0);
+					
+					if (numReadBytes != numExpectedBytes) {
+						System.out.printf(">>> WARNING: EXPECTED %d BYTES, READ %d\n", numExpectedBytes, numReadBytes);
+						// TODO: Skip all bytes left in the stream to prevent reading them next time
+					} else {
+						// clear line break at the end of the stream
+						inData.skip(1);
+					}
+					
+				    clientName = new String(data);
+				    
+				    
+					// send response
+				    // FIXME nothing to do here?
 				    
 					break;
 				default:
