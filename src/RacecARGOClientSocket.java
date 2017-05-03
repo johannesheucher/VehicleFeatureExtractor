@@ -3,6 +3,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -98,7 +99,37 @@ public class RacecARGOClientSocket implements Runnable {
 					}
 					
 				    clientName = new String(data);
+				    System.out.printf("Read player name: %s\n", clientName);
 				    
+					// send response
+				    // FIXME nothing to do here?
+				    
+					break;
+				case 3:
+					// GPS data
+					numExpectedBytes = 2 * Integer.BYTES;
+					
+					data = new byte[numExpectedBytes];
+					numReadBytes = 0;
+					do {
+						numReadBytes += inData.read(data, numReadBytes, numExpectedBytes - numReadBytes);
+					} while (numReadBytes < numExpectedBytes || numReadBytes == 0);
+					
+					if (numReadBytes != numExpectedBytes) {
+						System.out.printf(">>> WARNING: EXPECTED %d BYTES, READ %d\n", numExpectedBytes, numReadBytes);
+						// TODO: Skip all bytes left in the stream to prevent reading them next time
+					} else {
+						// clear line break at the end of the stream
+						inData.skip(1);
+					}
+					
+					
+					ByteBuffer location = ByteBuffer.wrap(data);
+					int intLatitude = NetworkUtil.swapIntEndian(location.getInt());
+					int intLongitude = NetworkUtil.swapIntEndian(location.getInt());
+					double latitude  = intLatitude / 1000000.0;
+					double longitude = intLongitude / 1000000.0;
+					System.out.printf("Read position: (%.6f, %.6f)\n", latitude, longitude);
 				    
 					// send response
 				    // FIXME nothing to do here?
