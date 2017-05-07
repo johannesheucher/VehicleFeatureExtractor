@@ -111,7 +111,7 @@ public class RacecARGOApp {
 			System.out.printf("Client %d has connected!\n", clientThreads.size());
 			
 			// move client to separate thread
-			Thread clientThread = new Thread(new RacecARGOClientSocket(client));
+			Thread clientThread = new Thread(new RacecARGOClientSocket(client, this));
 			clientThreads.add(clientThread);
 			clientThread.start();
 		}

@@ -19,9 +19,12 @@ public class RacecARGOClientSocket implements Runnable {
 	
 	private String clientName;
 	
+	private RacecARGOApp app;
 	
-	public RacecARGOClientSocket(Socket client) {
+	
+	public RacecARGOClientSocket(Socket client, RacecARGOApp app) {
 		this.client = client;
+		this.app = app;
 	}
 	
 	
@@ -65,7 +68,7 @@ public class RacecARGOClientSocket implements Runnable {
 					
 				    Mat mat = new Mat(numRows, numCols, CvType.CV_8UC1);
 				    mat.put(0, 0, data);
-				    //updateImage(mat);
+				    app.updateImage(mat);
 				    
 				    // classify
 					String label = vmmrApp.classifyImage(new ImageData(mat));
