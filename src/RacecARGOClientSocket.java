@@ -42,6 +42,31 @@ public class RacecARGOClientSocket implements Runnable {
 			// load classifier
 			VMMRTestVehicleApp vmmrApp = new VMMRTestVehicleApp();
 			
+			
+			/**
+			 * TODO:
+			 * playername wird nicht mehr geschickt. Das passiert nur in den Settings, nicht aber im GameNavController.
+			 * Dort muss es auch gemacht werden (nach kurzer Pause nach open).
+			 * Dann darf es allerdings bei Settings nicht mehr geschickt werden. Oder doch? Hier darf dann eben nicht doppelt eine Datei angelegt werden.
+			 * 
+			 * TODO:
+			 * Log anlegen (CSV):
+			 * type 3: Wenn Datei nicht schon existiert, lege sie an. Name: Playername_Uhrzeit.log.csv.
+			 * 		open
+			 * 		schreibe: type 3, Uhrzeit, player name
+			 * 		close
+			 * type 1: Wenn Datei schon existiert,
+			 * 		open
+			 * 		schreibe: type 1, Uhrzeit, make, model
+			 * 		close
+			 * type 2: Wenn Datei schon existiert,
+			 * 		open
+			 * 		schreibe: type 2, Uhrzeit, lat, lon
+			 * 		close
+			 */
+			
+			
+			
 			while (true) {
 				int messageType = inData.readUnsignedByte();
 				System.out.printf("Got message of type: %d\n", messageType);
