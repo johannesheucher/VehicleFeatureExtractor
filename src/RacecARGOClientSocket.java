@@ -1,9 +1,17 @@
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -18,6 +26,13 @@ public class RacecARGOClientSocket implements Runnable {
 	private DataInputStream inData;
 	
 	private String clientName;
+	private String filename;
+	
+	private double lastLatitude = 0;
+	private double lastLongitude = 0;
+	private double walkedDistance = 0;
+	
+	private DecimalFormat numberFormat;
 	
 	private RacecARGOApp app;
 	
@@ -25,7 +40,12 @@ public class RacecARGOClientSocket implements Runnable {
 	public RacecARGOClientSocket(Socket client, RacecARGOApp app) {
 		this.client = client;
 		this.app = app;
+		
+		NumberFormat formatUS = NumberFormat.getInstance(Locale.US);
+		numberFormat = (DecimalFormat)formatUS;
+		numberFormat.applyPattern("###.########");
 	}
+	
 	
 	
 	@Override
@@ -51,20 +71,27 @@ public class RacecARGOClientSocket implements Runnable {
 			 * 
 			 * TODO:
 			 * Log anlegen (CSV):
-			 * type 3: Wenn Datei nicht schon existiert, lege sie an. Name: Playername_Uhrzeit.log.csv.
+			 * type 2: Wenn Datei nicht schon existiert, lege sie an. Name: Playername_Uhrzeit.log.csv.
 			 * 		open
-			 * 		schreibe: type 3, Uhrzeit, player name
+			 * 		schreibe: type 2, Uhrzeit, player name
 			 * 		close
 			 * type 1: Wenn Datei schon existiert,
 			 * 		open
 			 * 		schreibe: type 1, Uhrzeit, make, model
 			 * 		close
-			 * type 2: Wenn Datei schon existiert,
+			 * type 3: Wenn Datei schon existiert,
 			 * 		open
-			 * 		schreibe: type 2, Uhrzeit, lat, lon
+			 * 		schreibe: type 3, Uhrzeit, lat, lon
 			 * 		close
 			 */
 			
+			/**
+			 * Log file (CSV), filename = <playername>_<time>.log.csv:
+			 * content: time, message type, message data
+			 * <time>, 2, <playername>
+			 * <time>, 1, <make and model>
+			 * <time>, 3, <lat>, <lon>, <overall session distance>
+			 */
 			
 			
 			while (true) {
@@ -93,11 +120,21 @@ public class RacecARGOClientSocket implements Runnable {
 					
 				    Mat mat = new Mat(numRows, numCols, CvType.CV_8UC1);
 				    mat.put(0, 0, data);
-				    app.updateImage(mat);
+				    
+				    // show image if there is only one running thread to prevent conflicts
+				    if (app.clientThreads.size() == 1) {
+				    	app.updateImage(mat);
+				    }
 				    
 				    // classify
 					String label = vmmrApp.classifyImage(new ImageData(mat));
 					System.out.printf("classified as:\t\t%s\n", label);
+					
+					
+					// write make and model into log
+				    if (filename != null) {
+				    	writeLog(1, label);
+				    }
 				    
 				    
 					// send response ("0" is "no error")
@@ -129,6 +166,14 @@ public class RacecARGOClientSocket implements Runnable {
 				    clientName = new String(data);
 				    System.out.printf("Read player name: %s\n", clientName);
 				    
+				    // create log file for this client
+				    if (filename == null) {
+				    	filename = String.format("log/%s_%s.log.csv", clientName, timeStamp());
+				    	File f = new File(filename);
+				    	f.createNewFile();
+				    	writeLog(2, clientName);
+				    }
+				    
 					// send response
 				    // FIXME nothing to do here?
 				    
@@ -157,7 +202,20 @@ public class RacecARGOClientSocket implements Runnable {
 					int intLongitude = NetworkUtil.swapIntEndian(location.getInt());
 					double latitude  = intLatitude / 1000000.0;
 					double longitude = intLongitude / 1000000.0;
-					System.out.printf("Read position: (%.6f, %.6f)\n", latitude, longitude);
+					System.out.printf("Read position: (%s, %s)\n", numberFormat.format(latitude), numberFormat.format(longitude));
+					
+					
+					// write lat, lon and distance into log
+				    if (filename != null) {
+				    	double distanceStep = distanceInKmBetweenEarthCoordinates(lastLatitude, lastLongitude, latitude, longitude);
+				    	if (distanceStep < 0.1) {
+				    		walkedDistance += distanceStep;
+				    	}
+				    	lastLatitude = latitude;
+				    	lastLongitude = longitude;
+				    	writeLog(3, String.format("%s,%s,%s", numberFormat.format(latitude), numberFormat.format(longitude), numberFormat.format(walkedDistance)));
+				    }
+				    
 				    
 					// send response
 				    // FIXME nothing to do here?
@@ -181,5 +239,41 @@ public class RacecARGOClientSocket implements Runnable {
 		}
 		
 		System.out.printf("Finished Socket for client %s\n", clientName);
+	}
+	
+	
+	
+	private double distanceInKmBetweenEarthCoordinates(double lat1, double lon1, double lat2, double lon2) {
+		int earthRadiusKm = 6371;
+		
+		double dLat = Math.toRadians(lat2-lat1);
+		double dLon = Math.toRadians(lon2-lon1);
+		
+		lat1 = Math.toRadians(lat1);
+		lat2 = Math.toRadians(lat2);
+		
+		double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		return earthRadiusKm * c;
+	}
+	
+	
+	
+	private void writeLog(int messageType, String data) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
+			writer.write(String.format("%s,%d,%s\n", timeStamp(), messageType, data));
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	private String timeStamp() {
+		DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+		String dateTime = formatter.format(LocalDateTime.now());
+		dateTime = dateTime.replaceAll(":", ".");
+		return dateTime;
 	}
 }
