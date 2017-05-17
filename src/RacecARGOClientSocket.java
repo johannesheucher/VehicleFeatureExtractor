@@ -164,6 +164,7 @@ public class RacecARGOClientSocket implements Runnable {
 					}
 					
 				    clientName = new String(data);
+				    clientName = clientName.replaceAll("[^a-zA-Z0-9]", "");
 				    System.out.printf("Read player name: %s\n", clientName);
 				    
 				    // create log file for this client
