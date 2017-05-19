@@ -130,7 +130,6 @@ public class RacecARGOClientSocket implements Runnable {
 					String label = vmmrApp.classifyImage(new ImageData(mat));
 					System.out.printf("classified as:\t\t%s\n", label);
 					
-					
 					// write make and model into log
 				    if (filename != null) {
 				    	writeLog(1, label);
