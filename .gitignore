@@ -20,6 +20,9 @@ $RECYCLE.BIN/
 # bin folder
 bin
 
+#log folder (as data is private)
+log
+
 # =========================
 # Operating System Files
 # =========================
