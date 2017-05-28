@@ -33,10 +33,10 @@ public class Dataset {
      * @param imagePath
      * @param normalize Turns images to gray and resizes them to the standard width specified in Const
      */
-	public Dataset(File imagePath, boolean normalize) {
+	public Dataset(File imagePath, boolean toGray, boolean normalizeWidth) {
 		imageList = new ArrayList<>(500);
 		vehicleCounts = new HashMap<>();
-		addData(imagePath, normalize);
+		addData(imagePath, toGray, normalizeWidth);
 	}
 	
 	
@@ -45,18 +45,19 @@ public class Dataset {
      * @param imagePath
      * @param normalize Turns images to gray and resizes them to the standard width specified in Const
      */
-	public void addData(File imagePath, boolean normalize) {
+	public void addData(File imagePath, boolean toGray, boolean normalizeWidth) {
 		// load all images from image path
 		if (imagePath.isDirectory()) {
             for (final File f : imagePath.listFiles(IMAGE_FILTER)) {
             	ImageData image = new ImageData(f);
             	
-            	if (normalize) {
+            	if (normalizeWidth) {
 	            	// resize all images so that they have the same size (at least width, aspect ratio not important, only for RoI)
 	        		// This is important because the filter kernels have a distinct size and the car in each image should cover a more or less
 	        		// constant percentage of area of the image.
 	            	image.resize(Const.IMAGE_WIDTH);
-	            	
+            	}
+	            if (toGray) {
 	            	image.toGray();
             	}
             	

@@ -13,7 +13,7 @@ public class VehicleCounterApp {
 	
 	
 	public VehicleCounterApp() {
-		Dataset dataset = new Dataset(new File(PATH), false);
+		Dataset dataset = new Dataset(new File(PATH), false, false);
 		
 		String[] output = new String[dataset.getVehicleCounts().size()];
 		Iterator<Entry<String, Integer>> entryIterator = dataset.getVehicleCounts().entrySet().iterator();

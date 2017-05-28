@@ -28,15 +28,21 @@ public class DictionaryTestApp {
 	private static final String ARFF_FILENAME = "_%svehicles.arff";
 	private static final String DICTIONARY_FILENAME = "_%sdictionary.bytes";
 	
-	public DictionaryTestApp(String dataId) throws IOException {
-		Dataset trainingSet = new Dataset(new File(INPUT_PATH), false);
+	public DictionaryTestApp(String dataId, boolean single) throws IOException {
+		Dataset trainingSet = new Dataset(new File(INPUT_PATH), true, false);
 		
-	    DictionaryTestApp.buildDictionaryAndARFF(trainingSet.getImageList(), DICTIONARY_SIZE, OUTPUT_PATH, dataId);
+		List<ImageData> images = trainingSet.getImageList();
+		Dictionary dictionary;
+		if (single) {
+			dictionary = Dictionary.fromImages(images, DICTIONARY_SIZE, 0);
+		} else {
+			dictionary = Dictionary.fromImagesPerClass(images, 400, 100, 0.5);
+		}
+	    DictionaryTestApp.buildDictionaryAndARFF(images, dictionary, OUTPUT_PATH, dataId);
 	}
 	
 	
-	public static void buildDictionaryAndARFF(List<ImageData> images, int dictionarySize, String outputPath, String dataId) throws IOException {
-		Dictionary dictionary = Dictionary.fromImages(images, dictionarySize);
+	public static void buildDictionaryAndARFF(List<ImageData> images, Dictionary dictionary, String outputPath, String dataId) throws IOException {
 	    dictionary.save(outputPath + String.format(DICTIONARY_FILENAME, dataId));
 	    
 	    // build histograms
@@ -142,6 +148,6 @@ public class DictionaryTestApp {
 	public static void main(String[] args) throws IOException {
 		// load training set and build dictionary
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		new DictionaryTestApp("39");
+		new DictionaryTestApp("42_single", true);
 	}
 }

@@ -46,7 +46,7 @@ public class NumberPlateExtractorTestApp {
 	int pictureIndex = 0;
 	
 	public NumberPlateExtractorTestApp() {
-		Dataset dataset = new Dataset(new File(INPUT_PATH), true);
+		Dataset dataset = new Dataset(new File(INPUT_PATH), true, true);
 		
 		sourceImage = dataset.getImageList().get(pictureIndex);
 		grayImage = (ImageData)sourceImage.clone();

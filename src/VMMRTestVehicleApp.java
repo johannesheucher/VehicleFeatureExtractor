@@ -13,8 +13,8 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class VMMRTestVehicleApp {
-	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training/_39vehicles.arff";
-	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training/_39dictionary.bytes";
+	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training/_42_singlevehicles.arff";
+	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training/_42_singledictionary.bytes";
 	private static String TESTING_PATH			= "D:/workspaces/VehicleData/testing/";
 	
 	VMMRecognizer recognizer;
@@ -56,15 +56,15 @@ public class VMMRTestVehicleApp {
 		
 		final String id = "42";
 		
-		//VMMRTestVehicleApp app = new VMMRTestVehicleApp();
-		VMMRTestVehicleApp app = new VMMRTestVehicleApp("D:/workspaces/VehicleData/ARFF_test30/_00" + id + "vehicles.arff", "D:/workspaces/VehicleData/ARFF_test30/_00" + id + "dictionary.bytes");
+		VMMRTestVehicleApp app = new VMMRTestVehicleApp();
+		//VMMRTestVehicleApp app = new VMMRTestVehicleApp("D:/workspaces/VehicleData/ARFF_test30/_00" + id + "vehicles.arff", "D:/workspaces/VehicleData/ARFF_test30/_00" + id + "dictionary.bytes");
 		//VMMRTestVehicleApp app = new VMMRTestVehicleApp("D:/workspaces/VehicleData/ARFF_test30/_vehicles_30.arff", "D:/workspaces/VehicleData/ARFF_test30/_0030dictionary.bytes");
 		
 		// load test instance and classify
-		Dataset dataset = new Dataset(new File(TESTING_PATH), false);
-		for (ImageData image : dataset.getImageList()) {
-			String label = app.classifyImage(image);
-			System.out.printf("%s classified as:\t\t%s\n", image.getName(), label);
-		}
+//		Dataset dataset = new Dataset(new File(TESTING_PATH), false, false);
+//		for (ImageData image : dataset.getImageList()) {
+//			String label = app.classifyImage(image);
+//			System.out.printf("%s classified as:\t\t%s\n", image.getName(), label);
+//		}
 	}
 }

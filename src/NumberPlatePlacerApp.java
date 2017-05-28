@@ -47,7 +47,7 @@ public class NumberPlatePlacerApp {
 	private Map<String, Double> imageScale;
 	
 	public NumberPlatePlacerApp() {
-		Dataset dataset = new Dataset(new File(PATH), false);
+		Dataset dataset = new Dataset(new File(PATH), false, false);
 		imageScale = new HashMap<>();
 		for (ImageData image : dataset.getImageList()) {
 			if (image.getMat().cols() > 1200) {

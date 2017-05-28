@@ -43,8 +43,8 @@ public abstract class BOWTrainer {
 	}
 	
 	
-	public abstract Mat cluster();
+	public abstract Mat cluster(int minClusterMembers);
 	
 	
-	public abstract Mat cluster(Mat descriptors);
+	public abstract Mat cluster(Mat descriptors, int minClusterMembers);
 }

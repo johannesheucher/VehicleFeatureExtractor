@@ -14,6 +14,7 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import dataset.Dataset;
+import dataset.Dictionary;
 import dataset.ImageData;
 
 public class VMMRTestTrainingDataApp {
@@ -116,7 +117,8 @@ public class VMMRTestTrainingDataApp {
 			String dataId = String.format("%04d", id);
 			id++;
 			System.out.printf("num images: %d\n", subsetImages.size());
-			DictionaryTestApp.buildDictionaryAndARFF(subsetImages, DictionaryTestApp.DICTIONARY_SIZE, OUTPUT_PATH, dataId);
+			Dictionary dictionary = Dictionary.fromImages(subsetImages, DictionaryTestApp.DICTIONARY_SIZE, 0);
+			DictionaryTestApp.buildDictionaryAndARFF(subsetImages, dictionary, OUTPUT_PATH, dataId);
 			//System.out.printf("exported classification data %d / %d\n", id, subsets.size());
 		//}
 		System.out.println("exported dictionary with ARFF");
