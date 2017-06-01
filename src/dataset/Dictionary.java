@@ -41,6 +41,7 @@ public class Dictionary {
 	
 	
 	public static Dictionary fromImages(List<ImageData> images, int size, int minClusterMembers) {
+		System.out.printf("  %d instances, needed members: %d\n", images.size(), minClusterMembers);
 		List<Mat> descriptorsList = new ArrayList<>();
 		for (ImageData image : images) {
 			Mat descriptors = new Mat();

@@ -16,13 +16,13 @@ import processing.RoIExtractor;
 
 public class TrainingDataCreatorApp {
 	private static final String INPUT_PATH = "D:/workspaces/VehicleData/raw/";
-	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/testing/";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training2/";
 	private static final String NUMBER_PLATE_FILENAME = "_NumberPlates.csv";
 	private static final int ROI_WIDTH = 400;
 	
 	private static final int MIN_NUM_VEHICLES = 5;
-	private static final List<String> ALLOWED_VEHICLE_NAMES = Arrays.asList("vw_kaefer", "vw_polo_9n3", "mazda_mx-5_nd", "opel_mokka", "porsche_911", "vw_golf_iv", "opel_corsa_d");
-	private static final boolean USE_CONSTRAINTS = false;
+	private static final List<String> ALLOWED_VEHICLE_NAMES = Arrays.asList("vw_kaefer", "vw_polo_9n3", "mazda_mx-5_nd", "opel_mokka", "porsche_911", "vw_golf_iv", "opel_corsa_d_fl", "citroen_c4_cactus", "ford_fiesta", "tesla_model_s");
+	private static final boolean USE_CONSTRAINTS = true;
 	
 	private NumberPlateMetaFile numberPlateMeta;
 	

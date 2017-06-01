@@ -13,8 +13,8 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class VMMRTestVehicleApp {
-	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training/_42_singlevehicles.arff";
-	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training/_42_singledictionary.bytes";
+	private static String ARFF_FILENAME			= "D:/workspaces/VehicleData/training2/_44_modularvehicles.arff";
+	private static String DICTIONARY_FILENAME	= "D:/workspaces/VehicleData/training2/_44_modulardictionary.bytes";
 	private static String TESTING_PATH			= "D:/workspaces/VehicleData/testing/";
 	
 	VMMRecognizer recognizer;

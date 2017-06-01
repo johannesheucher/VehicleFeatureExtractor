@@ -8,7 +8,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.TermCriteria;
 
 /**
- * Translated to java from https://github.com/opencv/opencv/blob/master/modules/features2d/src/bagofwords.cpp
+ * Basis translated to java from https://github.com/opencv/opencv/blob/master/modules/features2d/src/bagofwords.cpp
+ * Adjusted by JH
  */
 public class BOWKMeansTrainer extends BOWTrainer {
 	private int k;
@@ -79,7 +80,7 @@ public class BOWKMeansTrainer extends BOWTrainer {
 	        start++;
 	    }
 		
-		System.out.printf("  removed %d clusters from dictionary\n", vocabulary.rows() - rowsToKeep.size());
+		System.out.printf("  removed %d clusters from dictionary, leaving %d\n", vocabulary.rows() - rowsToKeep.size(), rowsToKeep.size());
 	    
 	    return mergedRows;
 	}

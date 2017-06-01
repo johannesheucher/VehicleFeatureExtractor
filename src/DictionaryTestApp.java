@@ -23,8 +23,8 @@ import processing.FeatureExtractor;
 
 public class DictionaryTestApp {
 	public static final int DICTIONARY_SIZE = 300;
-	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training";
-	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training/";
+	private static final String INPUT_PATH = "D:/workspaces/VehicleData/training2";
+	private static final String OUTPUT_PATH = "D:/workspaces/VehicleData/training2/";
 	private static final String ARFF_FILENAME = "_%svehicles.arff";
 	private static final String DICTIONARY_FILENAME = "_%sdictionary.bytes";
 	
@@ -36,7 +36,7 @@ public class DictionaryTestApp {
 		if (single) {
 			dictionary = Dictionary.fromImages(images, DICTIONARY_SIZE, 0);
 		} else {
-			dictionary = Dictionary.fromImagesPerClass(images, 400, 100, 0.5);
+			dictionary = Dictionary.fromImagesPerClass(images, 500, 320, 0.85);
 		}
 	    DictionaryTestApp.buildDictionaryAndARFF(images, dictionary, OUTPUT_PATH, dataId);
 	}
@@ -145,9 +145,10 @@ public class DictionaryTestApp {
 	}
 	
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		// load training set and build dictionary
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		new DictionaryTestApp("42_single", true);
+		new DictionaryTestApp("44_modular", false);
+		VMMRTestVehicleApp app = new VMMRTestVehicleApp();
 	}
 }
